@@ -34,11 +34,15 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
+          username: ubuntu
           key: ${{ secrets.EC2_KEY }}
           script: |
-            cd /home/ec2-user/kspot
+            cd /home/ubuntu/kspot
+            git reset --hard
             git pull origin develop
+
+            cd /home/ubuntu/kspot
+            chmod +x gradlew
             ./gradlew build -x test
             pkill -f 'java -jar' || true
             nohup java -jar build/libs/kspot-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
