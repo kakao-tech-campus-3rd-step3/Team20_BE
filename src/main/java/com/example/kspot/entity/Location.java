@@ -1,4 +1,4 @@
-package com.example.kspot.domain;
+package com.example.kspot.entity;
 
 
 import jakarta.persistence.*;
