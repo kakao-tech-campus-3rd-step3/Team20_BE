@@ -36,11 +36,17 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_KEY }}
-            script: |
-              cd /home/ubuntu/kspot
-              git reset --hard
-              git pull origin develop
-              chmod +x gradlew
-              ./gradlew build -x test
-              sudo systemctl restart kspot
+          script: |
+            cd /home/ubuntu/kspot
 
+            git reset --hard
+            git pull origin develop
+
+            # Gradle 실행 권한
+            chmod +x gradlew
+
+            # Build
+            ./gradlew build -x test
+
+            # systemd 서비스 재시작
+            sudo systemctl restart kspot
