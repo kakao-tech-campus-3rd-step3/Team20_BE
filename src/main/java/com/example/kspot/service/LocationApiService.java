@@ -30,7 +30,7 @@ public class LocationApiService {
     }
 
     public void fetchAndSaveLocations() throws Exception {
-        String url = String.format("%s?page=1&perPage=20&serviceKey=%s", baseUrl, serviceKey);
+        String url = String.format("%s?page=3&perPage=20&serviceKey=%s", baseUrl, serviceKey);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
