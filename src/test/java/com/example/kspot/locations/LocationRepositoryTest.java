@@ -25,14 +25,12 @@ class LocationRepositoryTest {
         loc.setAddress("서울 어딘가");
         loc.setLatitude(37.1);
         loc.setLongitude(127.1);
-        loc.setDescription("old desc");
         locationRepository.save(loc);
 
         LocalDateTime before = loc.getUpdatedAt();
 
         // when
         Thread.sleep(1000);
-        loc.setDescription("new desc");
         locationRepository.save(loc);
 
         // then
