@@ -1,10 +1,15 @@
 package com.example.kspot.contents.entity;
 
+import com.example.kspot.artists.entity.Artists;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.Set;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -50,4 +55,14 @@ public class Content {
 
   // Setter는 현재 MVP에서는 필요없을 것이라 생각해 생략
   // 이후, 관리자 페이지 생성시 필요해질 것으로 예상해 차후 추가예정
+
+  // Content-Artist간 many to many 매핑
+  @ManyToMany
+  @JoinTable(
+      name = "content_artist",
+      joinColumns = @JoinColumn(name = "content_id"),
+      inverseJoinColumns = @JoinColumn(name = "artist_id")
+  )
+  private Set<Artists> artists;
+  public Set<Artists> getArtists() {return artists;}
 }

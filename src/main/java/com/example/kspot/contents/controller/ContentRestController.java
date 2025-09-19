@@ -64,10 +64,21 @@ public class ContentRestController {
 
   // 2. id로 특정 컨텐츠 조회
   @GetMapping("/{id}")
-  public ResponseEntity<Content> getContentById(@PathVariable Long id){
-    return contentService.getContentById(id)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
+  public ResponseEntity<Map<String, Object>> getContentById(@PathVariable Long id) {
+    return contentService.getContentDetailWithArtists(id)
+        .map(data -> {
+          Map<String, Object> response = new HashMap<>();
+          response.put("status", 200);
+          response.put("message", "콘텐츠 상세 조회 성공");
+          response.put("data", data);
+          return ResponseEntity.ok(response);
+        })
+        .orElseGet(() -> {
+          Map<String, Object> response = new HashMap<>();
+          response.put("status", 404);
+          response.put("message", "콘텐츠를 찾을 수 없습니다");
+          return ResponseEntity.status(404).body(response);
+        });
   }
 
   // 3. title로 연관 컨텐츠 간략조회
