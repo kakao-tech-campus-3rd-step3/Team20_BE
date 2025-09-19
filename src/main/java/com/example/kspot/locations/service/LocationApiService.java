@@ -1,7 +1,7 @@
-package com.example.kspot.service;
+package com.example.kspot.locations.service;
 
-import com.example.kspot.entity.Location;
-import com.example.kspot.repository.LocationRepository;
+import com.example.kspot.locations.entity.Location;
+import com.example.kspot.locations.repository.LocationRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,7 +49,6 @@ public class LocationApiService {
                 String address = item.path("주소").asText();
                 Double lat = parseDouble(item.path("위도").asText());
                 Double lng = parseDouble(item.path("경도").asText());
-                String desc = item.path("장소설명").asText();
 
                 Location location = locationRepository.findByName(name)
                         .orElse(new Location());
@@ -58,8 +57,6 @@ public class LocationApiService {
                 location.setAddress(address);
                 location.setLatitude(lat);
                 location.setLongitude(lng);
-                location.setDescription(desc);
-
                 locationRepository.save(location);
             }
         }
