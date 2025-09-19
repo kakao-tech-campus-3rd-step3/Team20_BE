@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,7 +18,7 @@ public class ContentService {
     this.contentRepository = contentRepository;
   }
 
-  // 전체 컨텐츠 조회
+  // 전체 컨텐츠 목록 조회
   public Page<Content> getAllContents(int page, int size) {
     return contentRepository.findAll(PageRequest.of(page, size));
   }
@@ -27,8 +28,8 @@ public class ContentService {
     return contentRepository.findById(id);
   }
 
-  // title로 컨텐츠 조회
-  public Optional<Content> getContentByTitle(String title) {
-    return contentRepository.findByTitle(title);
+  // title로 컨텐츠 목록 조회
+  public Page<Content> searchContentByTitle(String keyword, Pageable pageable) {
+    return contentRepository.findByTitleContainingIgnoreCase(keyword, pageable);
   }
 }

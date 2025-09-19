@@ -5,11 +5,13 @@ import com.example.kspot.contents.service.ContentService;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,8 +36,7 @@ public class ContentRestController {
     List<Map<String, Object>> items = contentPage.getContent().stream().map(c ->{
       Map<String, Object> item = new HashMap<>();
       item.put("contentId", c.getContent_id());
-      String category = c.getCategory().equalsIgnoreCase("tv") ? "drama" : c.getCategory().toLowerCase();
-      item.put("category", category);
+      item.put("category", c.getCategory());
       item.put("title", c.getTitle());
       item.put("posterImageUrl", c.getPoster_image_url());
       item.put("releaseDate", c.getRelease_date());
@@ -58,5 +59,13 @@ public class ContentRestController {
     response.put("data", data);
 
     return ResponseEntity.ok(response);
+  }
+
+  // 2. id로 특정 컨텐츠 조회
+  @GetMapping("/{id}")
+  public ResponseEntity<Content> getContentById(@PathVariable Long id){
+    return contentService.getContentById(id)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
   }
 }
