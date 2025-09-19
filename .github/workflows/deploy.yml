@@ -45,8 +45,12 @@ jobs:
             # Gradle 실행 권한
             chmod +x gradlew
 
-            # Build
-            ./gradlew build -x test
+            # systemd 환경변수로 8080포트 고정으로 열리도록 지정
+            sudo mkdir -p /etc/systemd/system/kspot.service.d
+            echo "[Service]" | sudo tee /etc/systemd/system/kspot.service.d/override.conf
+            echo "Environment=SERVER_PORT=8080" | sudo tee -a /etc/systemd/system/kspot.service.d/override.conf
+            echo "Environment=SERVER_ADDRESS=0.0.0.0" | sudo tee -a /etc/systemd/system/kspot.service.d/override.conf
 
-            # systemd 서비스 재시작
+            # systemd reload + 서비스 재시작
+            sudo systemctl daemon-reload
             sudo systemctl restart kspot
