@@ -29,7 +29,7 @@ public class ContentService {
   }
 
   // title로 컨텐츠 목록 조회
-  public Page<Content> searchContentByTitle(String keyword, Pageable pageable) {
-    return contentRepository.findByTitleContainingIgnoreCase(keyword, pageable);
+  public Page<Content> searchContentByTitle(String keyword, int page, int size) {
+    return contentRepository.findByTitleContainingIgnoreCase(keyword, PageRequest.of(page, size));
   }
 }

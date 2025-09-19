@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -67,5 +68,44 @@ public class ContentRestController {
     return contentService.getContentById(id)
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());
+  }
+
+  // 3. title로 연관 컨텐츠 간략조회
+  @GetMapping("/search")
+  public ResponseEntity<Map<String, Object>> getAllContentsByTitle(
+      @RequestParam String title,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10")  int size
+  ){
+    Page<Content> contents = contentService.searchContentByTitle(title, page, size);
+
+    List<Map<String, Object>> items = contents.getContent().stream().map((c-> {
+      Map<String, Object> item = new HashMap<>();
+      item.put("contentId", c.getContent_id());
+      item.put("category", c.getCategory());
+      item.put("title", c.getTitle());
+      item.put("posterImageUrl", c.getPoster_image_url());
+      item.put("releaseDate", c.getRelease_date());
+      return item;
+    })).collect(Collectors.toList());
+
+    // pagination 정보
+    Map<String, Object> pagination = new HashMap<>();
+    pagination.put("currentPage", contents.getNumber());
+    pagination.put("itemsPerPage", contents.getSize());
+    pagination.put("totalItems", contents.getTotalElements());
+    pagination.put("totalPages", contents.getTotalPages());
+
+    // 최종 response
+    Map<String, Object> data = new HashMap<>();
+    data.put("items", items);
+    data.put("pagination", pagination);
+
+    Map<String, Object> response = new HashMap<>();
+    response.put("status", 200);
+    response.put("message", "연관 콘텐츠 조회 성공");
+    response.put("data", data);
+
+    return ResponseEntity.ok(response);
   }
 }
