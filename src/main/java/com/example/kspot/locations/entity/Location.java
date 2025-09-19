@@ -1,4 +1,4 @@
-package com.example.kspot.entity;
+package com.example.kspot.locations.entity;
 
 
 import jakarta.persistence.*;

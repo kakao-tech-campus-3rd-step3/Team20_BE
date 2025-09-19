@@ -1,7 +1,7 @@
-package com.example.kspot.service;
+package com.example.kspot.locations.service;
 
-import com.example.kspot.entity.Location;
-import com.example.kspot.repository.LocationRepository;
+import com.example.kspot.locations.entity.Location;
+import com.example.kspot.locations.repository.LocationRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
