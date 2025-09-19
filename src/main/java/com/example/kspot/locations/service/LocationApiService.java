@@ -49,7 +49,6 @@ public class LocationApiService {
                 String address = item.path("주소").asText();
                 Double lat = parseDouble(item.path("위도").asText());
                 Double lng = parseDouble(item.path("경도").asText());
-                String desc = item.path("장소설명").asText();
 
                 Location location = locationRepository.findByName(name)
                         .orElse(new Location());
@@ -58,8 +57,6 @@ public class LocationApiService {
                 location.setAddress(address);
                 location.setLatitude(lat);
                 location.setLongitude(lng);
-                location.setDescription(desc);
-
                 locationRepository.save(location);
             }
         }
