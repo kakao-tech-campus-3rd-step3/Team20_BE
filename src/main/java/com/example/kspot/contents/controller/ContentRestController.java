@@ -119,4 +119,17 @@ public class ContentRestController {
 
     return ResponseEntity.ok(response);
   }
+
+  // 4. content id로 연관 location 조회
+  @GetMapping("/related-location/{id}")
+  public ResponseEntity<Map<String, Object>> getRelatedLocations(@PathVariable("id") Long contentId) {
+    List<Map<String, Object>> locations = contentService.getRelatedLocations(contentId);
+
+    Map<String, Object> response = new HashMap<>();
+    response.put("status", 200);
+    response.put("message", "콘텐츠 관련 장소 조회 성공");
+    response.put("data", locations.isEmpty() ? null : locations.get(0)); // 요청 JSON 기준, 한 개만 보여줌
+
+    return ResponseEntity.ok(response);
+  }
 }

@@ -1,6 +1,7 @@
 package com.example.kspot.contents.entity;
 
 import com.example.kspot.artists.entity.Artists;
+import com.example.kspot.locations.entity.Location;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -65,4 +66,5 @@ public class Content {
   )
   private Set<Artists> artists;
   public Set<Artists> getArtists() {return artists;}
+
 }
