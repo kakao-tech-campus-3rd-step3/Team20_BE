@@ -1,6 +1,6 @@
-package com.example.kspot;
+package com.example.kspot.locations;
 
-import com.example.kspot.scheduler.LocationScheduler;
+import com.example.kspot.locations.scheduler.LocationScheduler;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

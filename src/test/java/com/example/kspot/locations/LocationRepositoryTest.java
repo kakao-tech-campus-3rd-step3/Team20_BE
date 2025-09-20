@@ -1,7 +1,7 @@
-package com.example.kspot;
+package com.example.kspot.locations;
 
-import com.example.kspot.entity.Location;
-import com.example.kspot.repository.LocationRepository;
+import com.example.kspot.locations.entity.Location;
+import com.example.kspot.locations.repository.LocationRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,14 +25,12 @@ class LocationRepositoryTest {
         loc.setAddress("서울 어딘가");
         loc.setLatitude(37.1);
         loc.setLongitude(127.1);
-        loc.setDescription("old desc");
         locationRepository.save(loc);
 
         LocalDateTime before = loc.getUpdatedAt();
 
         // when
         Thread.sleep(1000);
-        loc.setDescription("new desc");
         locationRepository.save(loc);
 
         // then

@@ -1,4 +1,4 @@
-package com.example.kspot.entity;
+package com.example.kspot.locations.entity;
 
 
 import jakarta.persistence.*;
@@ -19,7 +19,6 @@ public class Location {
     private String address;
     private Double latitude;
     private Double longitude;
-    private String description;
 
     @CreationTimestamp
     @Column(updatable = false)
@@ -42,9 +41,6 @@ public class Location {
 
     public Double getLongitude() { return longitude; }
     public void setLongitude(Double longitude) { this.longitude = longitude; }
-
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

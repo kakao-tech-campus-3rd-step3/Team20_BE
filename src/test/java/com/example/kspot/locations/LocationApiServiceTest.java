@@ -1,8 +1,8 @@
-package com.example.kspot;
+package com.example.kspot.locations;
 
-import com.example.kspot.entity.Location;
-import com.example.kspot.repository.LocationRepository;
-import com.example.kspot.service.LocationApiService;
+import com.example.kspot.locations.entity.Location;
+import com.example.kspot.locations.repository.LocationRepository;
+import com.example.kspot.locations.service.LocationApiService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
