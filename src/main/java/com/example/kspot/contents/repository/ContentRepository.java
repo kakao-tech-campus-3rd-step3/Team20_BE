@@ -8,6 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ContentRepository extends JpaRepository<Content, Long> {
 
-  // title이 포함된 모든 컨텐츠 간략 조회
-  Page<Content> findByTitleContainingIgnoreCase(String title, Pageable pageable);
+  // keyword가 포함된 모든 컨텐츠 간략 조회
+  Page<Content> findByTitleContainingIgnoreCase(String keyword, Pageable pageable);
 }
