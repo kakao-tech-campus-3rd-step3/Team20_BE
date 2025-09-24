@@ -44,6 +44,7 @@ jobs:
 
             # Gradle 실행 권한
             chmod +x gradlew
+            ./gradlew build -x test
 
             # systemd 환경변수로 8080포트 고정으로 열리도록 지정
             sudo mkdir -p /etc/systemd/system/kspot.service.d
