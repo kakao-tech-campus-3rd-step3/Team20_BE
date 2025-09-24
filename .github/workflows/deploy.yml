@@ -49,7 +49,22 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_KEY }}
           source: "./build/libs/KSPOT-0.0.1-SNAPSHOT.jar"
-          target: "/home/ubuntu/kspot/app.jar"
+          target: "/home/ubuntu/kspot/KSPOT-0.0.1-SNAPSHOT.jar"
+
+      - name: Rename jar on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            cd /home/ubuntu/kspot
+            # 기존 app.jar가 파일이든 디렉터리든 삭제
+            if [ -e app.jar ]; then
+              rm -rf app.jar
+            fi
+            # jar 파일을 app.jar로 복사
+            cp KSPOT-0.0.1-SNAPSHOT.jar app.jar
 
       - name: Restart service on EC2
         uses: appleboy/ssh-action@v1.0.3
