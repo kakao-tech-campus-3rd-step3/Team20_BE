@@ -47,8 +47,8 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_KEY }}
-          source: "./build/libs/*.jar"
-          target: "/home/ubuntu/kspot/"
+          source: "./build/libs/KSPOT-0.0.1-SNAPSHOT.jar"
+          target: "/home/ubuntu/kspot/app.jar"
 
       - name: Rename JAR on EC2
         uses: appleboy/ssh-action@v1.0.3
