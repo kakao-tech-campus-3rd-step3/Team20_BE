@@ -78,10 +78,9 @@ public class ContentRestController {
   @GetMapping("/search")
   public ResponseEntity<Map<String, Object>> getAllContentsByTitle(
       @RequestParam String title,
-      @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "10")  int size
-  ){
-    Page<Content> contents = contentService.searchContentByTitle(title, page, size);
+      Pageable pageable
+    ){
+    Page<Content> contents = contentService.searchContentByTitle(title, pageable);
 
     List<Map<String, Object>> items = contents.getContent().stream().map((c-> {
       Map<String, Object> item = new HashMap<>();
