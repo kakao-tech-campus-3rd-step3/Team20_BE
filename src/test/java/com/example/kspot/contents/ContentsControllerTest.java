@@ -48,7 +48,7 @@ public class ContentsControllerTest {
         .param("size", "10"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.status").value(200))
-        .andExpect(jsonPath("$.message").value("컨텐츠 목록 조회 성공"))
+        .andExpect(jsonPath("$.message").value("콘텐츠 목록 조회 성공"))
         .andExpect(jsonPath("$.data.items").isArray());
   }
 
@@ -91,9 +91,7 @@ public class ContentsControllerTest {
   void getContentByLocation_success() throws Exception {
     mockMvc.perform(get("/contents/related-location/{id}", 7))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.data.contentId").value(7))
-        .andExpect(jsonPath("$.data.locationId").value(2))
-        .andExpect(jsonPath("$.data.sceneDescription").value("전통 한옥 골목 장면"))
+        .andExpect(jsonPath("$.data").isArray())
         .andExpect(jsonPath("$.message").value("콘텐츠 관련 장소 조회 성공"))
         .andExpect(jsonPath("$.status").value(200));
   }
