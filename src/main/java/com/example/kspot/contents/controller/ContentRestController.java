@@ -29,11 +29,8 @@ public class ContentRestController {
 
   // 1. 전체 컨텐츠 조회
   @GetMapping
-  public ResponseEntity<Map<String, Object>> getAllContents(
-      @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "10") int size
-  ) {
-    Page<Content> contentPage = contentService.getAllContents(page, size);
+  public ResponseEntity<Map<String, Object>> getAllContents(Pageable pageable) {
+    Page<Content> contentPage = contentService.getAllContents(pageable);
     List<Map<String, Object>> items = contentPage.getContent().stream().map(c ->{
       Map<String, Object> item = new HashMap<>();
       item.put("contentId", c.getContent_id());
@@ -45,8 +42,8 @@ public class ContentRestController {
     }).collect(Collectors.toList());
 
     Map<String, Object> pagination = new HashMap<>();
-    pagination.put("currentPage", page);
-    pagination.put("itemsPerPage", size);
+    pagination.put("currentPage", contentPage.getNumber());
+    pagination.put("itemsPerPage", contentPage.getSize());
     pagination.put("totalItems", contentPage.getTotalElements());
     pagination.put("totalPages", contentPage.getTotalPages());
 

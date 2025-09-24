@@ -29,8 +29,8 @@ public class ContentService {
   }
 
   // 전체 컨텐츠 목록 조회
-  public Page<Content> getAllContents(int page, int size) {
-    return contentRepository.findAll(PageRequest.of(page, size));
+  public Page<Content> getAllContents(Pageable pageable) {
+    return contentRepository.findAll(pageable);
   }
 
   // id로 컨텐츠 조회
