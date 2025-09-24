@@ -49,8 +49,13 @@ public class Content {
   @Column(name = "updated_at")
   private LocalDateTime updated_at;
 
+  // Content_Artist와 one to many 관계 맺도록 설정
   @OneToMany(mappedBy = "content", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<ContentArtist> contentArtists = new ArrayList<>();
+
+  // Cotent_Location과 one to many 관계 맺도록 설정
+  @OneToMany(mappedBy = "content", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<ContentLocation> contentLocations = new ArrayList<>();
 
 
   // Getter
@@ -63,6 +68,7 @@ public class Content {
   public LocalDateTime getUpdated_at() {return updated_at;}
 
   public List<ContentArtist> getContentArtists() { return contentArtists; }
+  public List<ContentLocation> getContentLocations() { return contentLocations; }
   // Setter는 현재 MVP에서는 필요없을 것이라 생각해 생략
   // 이후, 관리자 페이지 생성시 필요해질 것으로 예상해 차후 추가예정
 }

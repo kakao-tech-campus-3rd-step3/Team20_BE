@@ -1,7 +1,9 @@
 package com.example.kspot.contents.service;
 
 import com.example.kspot.contents.dto.ContentDetailResponse;
+import com.example.kspot.contents.dto.ContentLocationResponse;
 import com.example.kspot.contents.entity.Content;
+import com.example.kspot.contents.entity.ContentLocation;
 import com.example.kspot.contents.repository.ContentLocationRepository;
 import com.example.kspot.contents.repository.ContentRepository;
 import jakarta.websocket.OnClose;
@@ -45,16 +47,10 @@ public class ContentService {
     return contentRepository.findByTitleContainingIgnoreCase(keyword, pageable);
   }
 
-  public List<Map<String, Object>> getRelatedLocations(Long contentId) {
+  public List<ContentLocationResponse> getRelatedLocations(Long contentId) {
     return contentLocationRepository.findByIdContentId(contentId)
         .stream()
-        .map(cl -> {
-          Map<String, Object> map = new HashMap<>();
-          map.put("contentId", cl.getContent().getContent_id());
-          map.put("locationId", cl.getLocation().getLocationId());
-          map.put("sceneDescription", cl.getSceneDescription());
-          return map;
-        })
-        .collect(Collectors.toList());
+        .map(ContentLocationResponse::fromEntity)
+        .toList();
   }
 }

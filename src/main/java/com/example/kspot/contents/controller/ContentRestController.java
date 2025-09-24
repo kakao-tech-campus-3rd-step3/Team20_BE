@@ -4,13 +4,14 @@ import com.example.kspot.contents.dto.ApiResponse;
 import com.example.kspot.contents.dto.ContentDetailResponse;
 import com.example.kspot.contents.dto.ContentItemDto;
 import com.example.kspot.contents.dto.ContentListResponse;
+import com.example.kspot.contents.dto.ContentLocationResponse;
 import com.example.kspot.contents.dto.PaginationDto;
 import com.example.kspot.contents.entity.Content;
+import com.example.kspot.contents.entity.ContentLocation;
 import com.example.kspot.contents.service.ContentService;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,13 +105,14 @@ public class ContentRestController {
 
   // 4. content id로 연관 location 조회
   @GetMapping("/related-location/{id}")
-  public ResponseEntity<Map<String, Object>> getRelatedLocations(@PathVariable("id") Long contentId) {
-    List<Map<String, Object>> locations = contentService.getRelatedLocations(contentId);
+  public ResponseEntity<ApiResponse<List<ContentLocationResponse>>> getRelatedLocations(@PathVariable("id") Long contentId) {
+    List<ContentLocationResponse> locations = contentService.getRelatedLocations(contentId);
 
-    Map<String, Object> response = new HashMap<>();
-    response.put("status", 200);
-    response.put("message", "콘텐츠 관련 장소 조회 성공");
-    response.put("data", locations.isEmpty() ? null : locations.get(0)); // 요청 JSON 기준, 한 개만 보여줌
+    ApiResponse<List<ContentLocationResponse>> response = new ApiResponse<>(
+        200,
+        "콘텐츠 관련 장소 조회 성공",
+        locations.isEmpty() ? null : locations
+    );
 
     return ResponseEntity.ok(response);
   }
