@@ -3,7 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - develop   # develop 브랜치에 push될 때 실행
+      - develop
 
 jobs:
   build:
@@ -20,38 +20,28 @@ jobs:
           distribution: 'temurin'
 
       - name: Build with Gradle
-        run: ./gradlew build -x test
+        run: ./gradlew clean build -x test
+
+      - name: Upload jar to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+          source: "build/libs/*.jar"
+          target: "/home/ubuntu/kspot/app.jar"
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Source
-        uses: actions/checkout@v3
-
-      - name: Deploy to EC2
+      - name: Restart service on EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_KEY }}
           script: |
-            cd /home/ubuntu/kspot
-
-            git reset --hard
-            git pull origin develop
-
-            # Gradle 실행 권한
-            chmod +x gradlew
-            ./gradlew build -x test
-
-            # systemd 환경변수로 8080포트 고정으로 열리도록 지정
-            sudo mkdir -p /etc/systemd/system/kspot.service.d
-            echo "[Service]" | sudo tee /etc/systemd/system/kspot.service.d/override.conf
-            echo "Environment=SERVER_PORT=8080" | sudo tee -a /etc/systemd/system/kspot.service.d/override.conf
-            echo "Environment=SERVER_ADDRESS=0.0.0.0" | sudo tee -a /etc/systemd/system/kspot.service.d/override.conf
-
-            # systemd reload + 서비스 재시작
             sudo systemctl daemon-reload
             sudo systemctl restart kspot
