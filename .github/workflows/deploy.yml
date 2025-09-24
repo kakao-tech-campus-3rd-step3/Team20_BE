@@ -22,7 +22,26 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew clean bootJar -x test
 
-      - name: Upload jar to EC2
+      - name: Verify JAR exists
+        run: |
+          echo "Build/libs contents:"
+          ls -lh build/libs
+          if [ ! -f build/libs/*.jar ]; then
+            echo "JAR file not found!"
+            exit 1
+          fi
+
+      - name: Ensure target directory on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            mkdir -p /home/ubuntu/kspot
+            chown ubuntu:ubuntu /home/ubuntu/kspot
+
+      - name: Upload JAR to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -30,8 +49,8 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           source: "./build/libs/*.jar"
           target: "/home/ubuntu/kspot/"
-          
-      - name: Rename jar on EC2
+
+      - name: Rename JAR on EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -40,8 +59,7 @@ jobs:
           script: |
             cd /home/ubuntu/kspot
             JAR_FILE=$(ls *.jar | head -n 1)
-            mv "$JAR_FILE" app.jar
-
+            mv -f "$JAR_FILE" app.jar
 
   deploy:
     needs: build
