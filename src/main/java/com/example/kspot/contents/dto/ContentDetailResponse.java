@@ -1,9 +1,8 @@
 package com.example.kspot.contents.dto;
 
 import com.example.kspot.artists.dto.ArtistsResponseDto;
-import com.example.kspot.artists.entity.Artists;
 import com.example.kspot.contents.entity.Content;
-import java.time.LocalDate;
+import com.example.kspot.contents.entity.ContentArtist;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -14,6 +13,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class ContentDetailResponse {
+
   private Long contentId;
   private String category;
   private String title;
@@ -21,15 +21,17 @@ public class ContentDetailResponse {
   private LocalDateTime releaseDate;
   private List<ArtistsResponseDto> artists;
 
-  public static ContentDetailResponse fromEntity(Content content){
+  public static ContentDetailResponse fromEntity(Content content) {
     return new ContentDetailResponse(
         content.getContent_id(),
         content.getCategory(),
         content.getTitle(),
         content.getPoster_image_url(),
         content.getRelease_date(),
-        content.getArtists().stream()
-                .map(ArtistsResponseDto::fromEntity).toList()
+        content.getContentArtists().stream()
+            .map(ContentArtist::getArtists)
+            .map(ArtistsResponseDto::fromEntity).
+            toList()
     );
   }
 }
