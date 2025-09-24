@@ -1,5 +1,9 @@
 package com.example.kspot.contents.controller;
 
+import com.example.kspot.contents.dto.ApiResponse;
+import com.example.kspot.contents.dto.ContentItemDto;
+import com.example.kspot.contents.dto.ContentListResponse;
+import com.example.kspot.contents.dto.PaginationDto;
 import com.example.kspot.contents.entity.Content;
 import com.example.kspot.contents.service.ContentService;
 import java.util.HashMap;
@@ -29,33 +33,29 @@ public class ContentRestController {
 
   // 1. 전체 컨텐츠 조회
   @GetMapping
-  public ResponseEntity<Map<String, Object>> getAllContents(Pageable pageable) {
+  public ResponseEntity<ApiResponse<ContentListResponse>> getAllContents(Pageable pageable) {
     Page<Content> contentPage = contentService.getAllContents(pageable);
-    List<Map<String, Object>> items = contentPage.getContent().stream().map(c ->{
-      Map<String, Object> item = new HashMap<>();
-      item.put("contentId", c.getContent_id());
-      item.put("category", c.getCategory());
-      item.put("title", c.getTitle());
-      item.put("posterImageUrl", c.getPoster_image_url());
-      item.put("releaseDate", c.getRelease_date());
-      return item;
-    }).collect(Collectors.toList());
 
-    Map<String, Object> pagination = new HashMap<>();
-    pagination.put("currentPage", contentPage.getNumber());
-    pagination.put("itemsPerPage", contentPage.getSize());
-    pagination.put("totalItems", contentPage.getTotalElements());
-    pagination.put("totalPages", contentPage.getTotalPages());
+    // 전체 컨텐츠들 간략정보 넣기
+    List<ContentItemDto> items = contentPage.getContent().stream()
+        .map(c -> new ContentItemDto(
+            c.getContent_id(),
+            c.getCategory(),
+            c.getTitle(),
+            c.getPoster_image_url()
+        )).collect(Collectors.toList());
 
-    Map<String, Object> data = new HashMap<>();
-    data.put("items", items);
-    data.put("pagination", pagination);
+    // pagination 정보 넣기
+    PaginationDto pagination = new PaginationDto(
+        contentPage.getNumber(),
+        contentPage.getSize(),
+        contentPage.getTotalElements(),
+        contentPage.getTotalPages()
+    );
+    ContentListResponse data = new ContentListResponse(items, pagination);
+    ApiResponse<ContentListResponse> response = new ApiResponse<>(200, "콘텐츠 목록 조회 성공", data);
 
-    Map<String, Object> response = new HashMap<>();
-    response.put("status", 200);
-    response.put("message", "컨텐츠 목록 조회 성공");
-    response.put("data", data);
-
+    // 합쳐서 response
     return ResponseEntity.ok(response);
   }
 
