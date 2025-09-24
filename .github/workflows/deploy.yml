@@ -20,7 +20,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Build with Gradle
-        run: ./gradlew clean build -x test
+        run: ./gradlew clean bootJar -x test
 
       - name: Upload jar to EC2
         uses: appleboy/scp-action@v0.1.7
@@ -29,7 +29,19 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_KEY }}
           source: "build/libs/*.jar"
-          target: "/home/ubuntu/kspot/app.jar"
+          target: "/home/ubuntu/kspot/"
+          
+      - name: Rename jar on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            cd /home/ubuntu/kspot
+            JAR_FILE=$(ls *.jar | head -n 1)
+            mv "$JAR_FILE" app.jar
+
 
   deploy:
     needs: build
