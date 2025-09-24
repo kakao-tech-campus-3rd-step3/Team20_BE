@@ -28,7 +28,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_KEY }}
-          source: "build/libs/*.jar"
+          source: "./build/libs/*.jar"
           target: "/home/ubuntu/kspot/"
           
       - name: Rename jar on EC2
