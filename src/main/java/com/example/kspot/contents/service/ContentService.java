@@ -1,5 +1,6 @@
 package com.example.kspot.contents.service;
 
+import com.example.kspot.contents.dto.ContentDetailResponse;
 import com.example.kspot.contents.entity.Content;
 import com.example.kspot.contents.repository.ContentLocationRepository;
 import com.example.kspot.contents.repository.ContentRepository;
@@ -34,27 +35,9 @@ public class ContentService {
   }
 
   // id로 컨텐츠 조회
-  public Optional<Map<String, Object>> getContentDetailWithArtists(Long id) {
+  public Optional<ContentDetailResponse> getContentDetailWithArtists(Long id) {
     return contentRepository.findById(id)
-        .map(c -> {
-          Map<String, Object> item = new HashMap<>();
-          item.put("contentId", c.getContent_id());
-          item.put("category", c.getCategory());
-          item.put("title", c.getTitle());
-          item.put("posterImageUrl", c.getPoster_image_url());
-          item.put("releaseDate", c.getRelease_date());
-
-          List<Map<String, Object>> artists = c.getArtists().stream()
-              .map(a -> {
-                Map<String, Object> map = new HashMap<>();
-                map.put("artistId", a.getArtistId());
-                map.put("name", a.getName());
-                return map;
-              })
-              .collect(Collectors.toList());
-          item.put("artists", artists);
-          return item;
-        });
+        .map(ContentDetailResponse::fromEntity);
   }
 
   // title로 컨텐츠 목록 조회

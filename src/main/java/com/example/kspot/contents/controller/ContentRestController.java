@@ -1,6 +1,7 @@
 package com.example.kspot.contents.controller;
 
 import com.example.kspot.contents.dto.ApiResponse;
+import com.example.kspot.contents.dto.ContentDetailResponse;
 import com.example.kspot.contents.dto.ContentItemDto;
 import com.example.kspot.contents.dto.ContentListResponse;
 import com.example.kspot.contents.dto.PaginationDto;
@@ -61,19 +62,14 @@ public class ContentRestController {
 
   // 2. id로 특정 컨텐츠 조회
   @GetMapping("/{id}")
-  public ResponseEntity<Map<String, Object>> getContentById(@PathVariable Long id) {
+  public ResponseEntity<ApiResponse<ContentDetailResponse>> getContentById(@PathVariable Long id) {
     return contentService.getContentDetailWithArtists(id)
         .map(data -> {
-          Map<String, Object> response = new HashMap<>();
-          response.put("status", 200);
-          response.put("message", "콘텐츠 상세 조회 성공");
-          response.put("data", data);
-          return ResponseEntity.ok(response);
+          ApiResponse<ContentDetailResponse> reponse = new ApiResponse<>(200, "콘텐츠 상세 조회 성공", data);
+          return ResponseEntity.ok(reponse);
         })
         .orElseGet(() -> {
-          Map<String, Object> response = new HashMap<>();
-          response.put("status", 404);
-          response.put("message", "콘텐츠를 찾을 수 없습니다");
+          ApiResponse<ContentDetailResponse> response = new ApiResponse<>(404, "콘텐츠를 찾을 수 없습니다", null);
           return ResponseEntity.status(404).body(response);
         });
   }
