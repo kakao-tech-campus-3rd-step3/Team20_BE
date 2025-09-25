@@ -7,7 +7,7 @@ public record LocationResponse (
         String name,
         String address,
         Double latitude,
-        Double longtitude,
+        Double longitude,
         List<RelatedContent> relatedContents
 ){
     public record RelatedContent(
