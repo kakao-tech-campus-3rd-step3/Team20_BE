@@ -1,6 +1,6 @@
-package com.example.kspot.locations.scheduler;
+package com.example.kspot.scheduler;
 
-import com.example.kspot.locations.service.LocationApiService;
+import com.example.kspot.service.LocationApiService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 

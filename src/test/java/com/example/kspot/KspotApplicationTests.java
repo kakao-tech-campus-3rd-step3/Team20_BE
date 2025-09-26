@@ -61,7 +61,7 @@ class KspotApplicationTests {
     List<String> cols = columns("locations");
     assertThat(cols).contains(
             "location_id", "name", "address",
-            "latitude", "longitude",
+            "latitude", "longitude", "description",
             "created_at", "updated_at"
     );
   }
@@ -116,10 +116,10 @@ class KspotApplicationTests {
   void insertAndSelectLocations_shouldReturnExpectedRow() {
     // Given
     jdbcTemplate.update("""
-    INSERT INTO locations(name, address, latitude, longitude)
-    VALUES (?,?,?,?)
+    INSERT INTO locations(name, address, latitude, longitude, description)
+    VALUES (?,?,?,?,?)
   """, "남산공원", "서울 중구 남산공원길 105",
-            37.5511694, 126.9882266);
+            37.5511694, 126.9882266, "테스트 촬영지");
 
     Long id = jdbcTemplate.queryForObject("""
     SELECT location_id FROM locations WHERE name=? ORDER BY location_id DESC LIMIT 1

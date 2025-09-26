@@ -1,6 +1,6 @@
-package com.example.kspot.locations.repository;
+package com.example.kspot.repository;
 
-import com.example.kspot.locations.entity.Location;
+import com.example.kspot.entity.Location;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
