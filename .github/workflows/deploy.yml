@@ -3,7 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - develop   # develop 브랜치에 push될 때 실행
+      - develop
 
 jobs:
   build:
@@ -39,14 +39,21 @@ jobs:
           script: |
             cd /home/ubuntu/kspot
 
+            # 변경사항 반영
             git reset --hard
             git pull origin develop
 
             # Gradle 실행 권한
             chmod +x gradlew
-
-            # Build
             ./gradlew build -x test
 
-            # systemd 서비스 재시작
-            sudo systemctl restart kspot
+            # 기존 실행 프로세스 종료 (포트 8080 사용 중이면 종료)
+            PID=$(lsof -t -i:8080)
+            if [ -n "$PID" ]; then
+              echo "Stopping existing process $PID"
+              kill -9 $PID
+            fi
+
+            # 새 애플리케이션 실행
+            nohup java -jar -Dspring.config.location=file:/home/ubuntu/config/application.properties /home/ubuntu/kspot/build/libs/KSPOT-0.0.1-SNAPSHOT.jar --server.port=8080 --server.address=0.0.0.0 > /home/ubuntu/kspot/nohup.log 2>&1 &
+            echo "Deployment complete"

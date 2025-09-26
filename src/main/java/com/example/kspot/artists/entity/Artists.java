@@ -29,11 +29,24 @@ public class Artists {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+
     public void setArtistId(Long artistId) {
         this.artistId = artistId;
     }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Long getArtistId() {
+        return artistId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getProfileImageUrl() {
+        return profileImageUrl;
     }
 }
