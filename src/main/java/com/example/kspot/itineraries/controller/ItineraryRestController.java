@@ -27,10 +27,12 @@ public class ItineraryRestController {
 
   @GetMapping("/{id}")
   public ResponseEntity<ApiResponse<ItineraryResponseDto>> getItinerary(@PathVariable Long id) {
-    ItineraryResponseDto response = itineraryService.getItineraryById(id);
-    return ResponseEntity.ok(
-        new ApiResponse<>(200, "여행 계획 상세 조회 성공", response)
-    );
+    return itineraryService.getItineraryById(id)
+        .map(response -> ResponseEntity.ok(
+            new ApiResponse<>(200, "여행 계획 상세 조회 성공", response)
+        ))
+        .orElseGet(() -> ResponseEntity.status(404)
+            .body(new ApiResponse<>(404, "존재하지 않는 여행계획 입니다", null)));
   }
 
   @PostMapping
