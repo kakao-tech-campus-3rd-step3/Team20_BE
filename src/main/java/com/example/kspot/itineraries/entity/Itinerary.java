@@ -38,7 +38,7 @@ public class Itinerary {
   @Column(name = "created_at", updatable = false, insertable = false)
   private LocalDateTime created_at;
 
-  @OneToMany(mappedBy = "ininerary", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "itinerary", cascade = CascadeType.ALL)
   private List<ItineraryLocation> itineraryLocations = new ArrayList<>();
 
   // 동선에 장소 추가
