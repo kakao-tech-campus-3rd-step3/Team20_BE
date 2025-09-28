@@ -2,8 +2,9 @@ package com.example.kspot.users.service;
 
 import com.example.kspot.jwt.JwtProvider;
 import com.example.kspot.users.dto.UserInfoResponseDto;
-import com.example.kspot.users.dto.UserRequestDto;
 import com.example.kspot.users.dto.UserResponseDto;
+import com.example.kspot.users.dto.UserUpdataRequestDto;
+import com.example.kspot.users.dto.UserUpdateResponseDto;
 import com.example.kspot.users.entity.Users;
 import com.example.kspot.users.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -38,9 +39,15 @@ public class UserService {
 
     }
 
-    public UserResponseDto updateUser(Long id, String nickname) {
+    public UserUpdateResponseDto updateUser(Long id, UserUpdataRequestDto dto) {
+        Users user = userRepository.findById(id).orElse(null);
+        user.setNickname(dto.nickname());
+        userRepository.save(user);
+        return new UserUpdateResponseDto(dto.nickname());
+    }
 
-
+    public void deleteUser(Long id) {
+        userRepository.deleteById(id);
     }
 
 }
