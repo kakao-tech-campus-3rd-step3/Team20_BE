@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class JwtProvider {
-    private final String secretKey = "kspot의시크릿키입니다.";
+    private final String secretKey = "kspot의시크릿키입니다.내가그린기린그림으잘그린기린그림이다";
 
     public String generateToken(Users user) {
         return Jwts.builder()
