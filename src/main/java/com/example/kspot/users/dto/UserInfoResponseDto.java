@@ -1,9 +1,6 @@
 package com.example.kspot.users.dto;
 
-import com.example.kspot.artists.dto.ArtistsResponseDto;
-import com.example.kspot.artists.entity.Artists;
 import com.example.kspot.users.entity.Users;
-import jakarta.persistence.Column;
 
 import java.time.LocalDateTime;
 

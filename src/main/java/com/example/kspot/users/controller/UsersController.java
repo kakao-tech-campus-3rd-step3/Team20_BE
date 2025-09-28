@@ -1,6 +1,9 @@
 package com.example.kspot.users.controller;
 
 import com.example.kspot.contents.dto.ApiResponse;
+import com.example.kspot.users.dto.UserInfoResponseDto;
+import com.example.kspot.users.dto.UserUpdataRequestDto;
+import com.example.kspot.users.dto.UserUpdateResponseDto;
 import com.example.kspot.users.entity.Users;
 import com.example.kspot.users.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -20,31 +23,34 @@ public class UsersController {
     public ResponseEntity<ApiResponse<?>> getUsers() {
 
         var data = userService.getUsers();
-        return ResponseEntity.ok(new ApiResponse(200,"사용자들 정보 조회 성공" , data));
+        return ResponseEntity.ok(new ApiResponse<>(200,"사용자들 정보 조회 성공" , data));
 
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse> getUsersByNickname(@PathVariable long id) {
-        var data = userService.getUserById(id);
-        return ResponseEntity.ok(new ApiResponse(200 , "사용자 정보 조회 성공" , data));
+    public ResponseEntity<ApiResponse<?>> getUsersByNickname(@PathVariable long id) {
+        UserInfoResponseDto data = userService.getUserById(id);
+        return ResponseEntity.ok(new ApiResponse<>(200 , "사용자 정보 조회 성공" , data));
     }
 
     @PostMapping
     public ResponseEntity<?> createUser(@RequestBody Users user) {
         var data = userService.register(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body("회원가입 성공");
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ApiResponse<>(204 , "회원가입 성공" , data));
     }
 
-    @PutMapping{"/{id}"}
-    public ResponseEntity<ApiResponse> updateUser(@PathVariable long id, @RequestBody String nickname) {
-
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<?>> updateUser(@PathVariable long id, @RequestBody UserUpdataRequestDto nickname) {
+        UserUpdateResponseDto data = userService.updateUser(id, nickname);
+        System.out.println(data);
+        return ResponseEntity.ok(new ApiResponse<>(200 , "사용자 이름 변경 성공" , data));
     }
 
-    @DeleteMapping{"/{id}"}
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable long id) {
-
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
     }
-
 
 }
