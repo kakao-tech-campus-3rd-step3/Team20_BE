@@ -34,7 +34,7 @@ public class ItineraryService {
   public ItineraryResponseDto getItineraryById(Long id) {
     return itineraryRepository.findById(id)
         .map(ItineraryResponseDto::fromEntity)
-        .orElseThrow(() -> new ItineraryNotFoundException("존재하지 않는 여행계획 입니다."));
+        .orElseThrow(() -> new ItineraryNotFoundException("존재하지 않는 여행계획 입니다"));
   }
 
 
