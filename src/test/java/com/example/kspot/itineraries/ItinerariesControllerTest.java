@@ -1,4 +1,4 @@
-package com.example.kspot.ltineraries;
+package com.example.kspot.itineraries;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -52,7 +52,7 @@ public class ItinerariesControllerTest {
   void getItineraryById_success() throws Exception {
     mockMvc.perform(get("/itineraries/{id}", existingItineraryId))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.data.itineraryId").value("1"))
+        .andExpect(jsonPath("$.data.itineraryId").value(existingItineraryId))
         .andExpect(jsonPath("$.data.title").value("BTS 테마 여행"))
         .andExpect(jsonPath("$.data.description").value("방탄소년단의 자취를 느낄 수 있는 여행계획!"))
         .andExpect(jsonPath("$.data.locations").isArray())

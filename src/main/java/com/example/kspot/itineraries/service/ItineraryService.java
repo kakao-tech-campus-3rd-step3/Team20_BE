@@ -6,6 +6,8 @@ import com.example.kspot.itineraries.dto.ItineraryResponseDto;
 import com.example.kspot.itineraries.dto.UserSummaryResponse;
 import com.example.kspot.itineraries.entity.Itinerary;
 import com.example.kspot.itineraries.entity.ItineraryLocation;
+import com.example.kspot.itineraries.exception.ItineraryNotFoundException;
+import com.example.kspot.itineraries.exception.LocationNotFoundException;
 import com.example.kspot.itineraries.repository.ItineraryRepository;
 import com.example.kspot.locations.entity.Location;
 import com.example.kspot.locations.repository.LocationRepository;
@@ -29,10 +31,12 @@ public class ItineraryService {
     this.locationRepository = locationRepository;
   }
 
-  public Optional<ItineraryResponseDto> getItineraryById(Long id) {
+  public ItineraryResponseDto getItineraryById(Long id) {
     return itineraryRepository.findById(id)
-        .map(ItineraryResponseDto::fromEntity);
+        .map(ItineraryResponseDto::fromEntity)
+        .orElseThrow(() -> new ItineraryNotFoundException("존재하지 않는 여행계획 입니다."));
   }
+
 
   public ItineraryResponseDto createItinerary(CreateItineraryRequest request, Long userId) {
     Itinerary itinerary = new Itinerary();
@@ -43,7 +47,8 @@ public class ItineraryService {
 
     List<ItineraryLocation> itineraryLocations = new ArrayList<>();
     for (CreateItineraryRequest.LocationRequest locReq : request.locations()) {
-      Location loc = locationRepository.findById(locReq.locationId()).orElse(null);
+      Location loc = locationRepository.findById(locReq.locationId())
+          .orElseThrow(() -> new LocationNotFoundException("잘못된 Location Id입니다"));
 
       ItineraryLocation il = new ItineraryLocation();
       il.setItinerary(itinerary);
