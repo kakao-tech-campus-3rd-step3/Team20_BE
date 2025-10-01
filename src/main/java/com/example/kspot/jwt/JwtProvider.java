@@ -23,10 +23,10 @@ public class JwtProvider {
     public Long validateToken(String token) {
         try {
             Claims claims = Jwts.parser()
-                    .setSigningKey(Keys.hmacShaKeyFor(secretKey.getBytes()))
+                    .verifyWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
                     .build()
-                    .parseClaimsJws(token)
-                    .getBody();
+                    .parseSignedClaims(token)
+                    .getPayload();
 
             return Long.parseLong(claims.getSubject());
         } catch (Exception e) {
