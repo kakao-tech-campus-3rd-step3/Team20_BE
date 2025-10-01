@@ -1,10 +1,7 @@
 package com.example.kspot.users.service;
 
 import com.example.kspot.jwt.JwtProvider;
-import com.example.kspot.users.dto.UserInfoResponseDto;
-import com.example.kspot.users.dto.UserResponseDto;
-import com.example.kspot.users.dto.UserUpdataRequestDto;
-import com.example.kspot.users.dto.UserUpdateResponseDto;
+import com.example.kspot.users.dto.*;
 import com.example.kspot.users.entity.Users;
 import com.example.kspot.users.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -32,10 +29,19 @@ public class UserService {
         //Todo 사용브랜치에 전역예외처리 클래스가 없어 추후 예외처리할 예정
     }
 
-    public UserResponseDto register(Users user) {
+    public UserResponseDto register(UserRequestDto user) {
 
-        userRepository.save(user);
-        return new UserResponseDto(jwtProvider.generateToken(user));
+        Users users = new Users(
+                null,
+                user.email(),
+                user.nickname(),
+                null,
+                user.password(),
+                null,
+                null
+        );
+        userRepository.save(users);
+        return new UserResponseDto(jwtProvider.generateToken(users));
 
     }
 
