@@ -2,6 +2,7 @@ package com.example.kspot.users.controller;
 
 import com.example.kspot.contents.dto.ApiResponse;
 import com.example.kspot.users.dto.UserInfoResponseDto;
+import com.example.kspot.users.dto.UserRequestDto;
 import com.example.kspot.users.dto.UserUpdataRequestDto;
 import com.example.kspot.users.dto.UserUpdateResponseDto;
 import com.example.kspot.users.entity.Users;
@@ -34,7 +35,7 @@ public class UsersController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createUser(@RequestBody Users user) {
+    public ResponseEntity<?> createUser(@RequestBody UserRequestDto user) {
         var data = userService.register(user);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new ApiResponse<>(204 , "회원가입 성공" , data));
