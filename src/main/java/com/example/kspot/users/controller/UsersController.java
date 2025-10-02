@@ -29,7 +29,7 @@ public class UsersController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> getUsersByNickname(@PathVariable long id) {
+    public ResponseEntity<ApiResponse<?>> getUsersById(@PathVariable long id) {
         UserInfoResponseDto data = userService.getUserById(id);
         return ResponseEntity.ok(new ApiResponse<>(200 , "사용자 정보 조회 성공" , data));
     }

@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -13,6 +16,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 @Table(
         name = "users",
         uniqueConstraints = {@UniqueConstraint(name = "uk_users_nickname" , columnNames = "nickname")}
@@ -31,10 +35,10 @@ public class Users {
     private String provider;
     private String password;
 
-    @Column(name = "created_at")
+    @CreatedDate
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
+    @LastModifiedDate
     private LocalDateTime updatedAt;
 
     @PrePersist
