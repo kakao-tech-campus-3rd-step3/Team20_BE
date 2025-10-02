@@ -39,6 +39,8 @@ public class Content {
   @Column(name = "release_date")
   private LocalDateTime release_date;
 
+  @Column(name = "popularity")
+  private Double popularity;
 
   // KSPOT 서비스에서 생성되는 정보(생성날짜, 업데이트된 날짜)
   @CreationTimestamp
@@ -64,6 +66,7 @@ public class Content {
   public String getTitle() {return title;}
   public String getPoster_image_url() {return poster_image_url;}
   public LocalDateTime getRelease_date() {return release_date;}
+  public Double getPopularity() {return popularity;}
   public LocalDateTime getCreated_at() {return created_at;}
   public LocalDateTime getUpdated_at() {return updated_at;}
 
