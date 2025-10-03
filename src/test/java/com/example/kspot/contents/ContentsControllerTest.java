@@ -89,7 +89,7 @@ public class ContentsControllerTest {
   @Test
   @DisplayName("5. id를 사용한 관련 location 조회 성공-7")
   void getContentByLocation_success() throws Exception {
-    mockMvc.perform(get("/contents/{id}/related-location", 7))
+    mockMvc.perform(get("/contents/related-location/{id}", 7))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.data").isArray())
         .andExpect(jsonPath("$.message").value("콘텐츠 관련 장소 조회 성공"))
@@ -99,7 +99,7 @@ public class ContentsControllerTest {
   @Test
   @DisplayName("6. id를 사용한 관련 location 조회 실패-2없는 경우")
   void getContentByLocation_fail() throws Exception {
-    mockMvc.perform(get("/contents/{id}/related-location", 3))
+    mockMvc.perform(get("/contents/related-location/{id}", 3))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.data").isEmpty())
         .andExpect(jsonPath("$.message").value("콘텐츠 관련 장소 조회 성공"))

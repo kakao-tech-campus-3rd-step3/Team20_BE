@@ -33,7 +33,6 @@ public class ItineraryRestController {
     );
   }
 
-
   @PostMapping
   public ResponseEntity<ApiResponse<ItineraryResponseDto>> createItinerary(
       @RequestBody CreateItineraryRequest request
