@@ -38,10 +38,11 @@ public class UserService {
                 null,
                 user.password(),
                 null,
+                null,
                 null
         );
         userRepository.save(users);
-        return new UserResponseDto(jwtProvider.generateToken(users));
+        return new UserResponseDto(jwtProvider.generateAccessToken(users));
 
     }
 
@@ -55,5 +56,22 @@ public class UserService {
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
+
+    public UserResponseDto login(UserRequestDto userRequestDto){
+
+        Users user = userRepository.findUsersByEmail(userRequestDto.email()).orElseThrow(
+                () -> new IllegalArgumentException  ("이메일이 일치하지 않습니다")
+        );
+
+        if(!user.getPassword().equals(userRequestDto.password())){
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다");
+        }
+
+        String accessToken = jwtProvider.generateAccessToken(user);
+
+        return new UserResponseDto(accessToken);
+
+    }
+
 
 }
