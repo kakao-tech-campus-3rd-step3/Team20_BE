@@ -104,7 +104,7 @@ public class ContentRestController {
   }
 
   // 4. content id로 연관 location 조회
-  @GetMapping("/related-location/{id}")
+  @GetMapping("{id}/related-location")
   public ResponseEntity<ApiResponse<List<ContentLocationResponse>>> getRelatedLocations(@PathVariable("id") Long contentId) {
     List<ContentLocationResponse> locations = contentService.getRelatedLocations(contentId);
 
