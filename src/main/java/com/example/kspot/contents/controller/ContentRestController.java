@@ -116,4 +116,26 @@ public class ContentRestController {
 
     return ResponseEntity.ok(response);
   }
+
+  //5.인기 컨텐츠 조회(전체/카테고리)
+  @GetMapping("/popular")
+  public ResponseEntity<ApiResponse<ContentListResponse>> getPopularContents(
+          @RequestParam(required = false) String category,
+          @RequestParam(defaultValue = "0") int page,
+          @RequestParam(defaultValue = "20") int size
+  ) {
+      Page<ContentItemDto> contents = contentService.getPopularContents(category, page, size);
+
+      PaginationDto pagination = new PaginationDto(
+              contents.getNumber(),
+              contents.getSize(),
+              contents.getTotalElements(),
+              contents.getTotalPages()
+      );
+
+      ContentListResponse data = new ContentListResponse(contents.getContent(), pagination);
+      ApiResponse<ContentListResponse> response = new ApiResponse<ContentListResponse>(200, "인기 콘텐츠 조회 성공", data);
+
+      return ResponseEntity.ok(response);
+  }
 }
