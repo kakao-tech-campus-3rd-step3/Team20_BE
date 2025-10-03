@@ -5,7 +5,6 @@ import com.example.kspot.users.dto.UserInfoResponseDto;
 import com.example.kspot.users.dto.UserRequestDto;
 import com.example.kspot.users.dto.UserUpdataRequestDto;
 import com.example.kspot.users.dto.UserUpdateResponseDto;
-import com.example.kspot.users.entity.Users;
 import com.example.kspot.users.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,6 +51,13 @@ public class UsersController {
     public ResponseEntity<Void> deleteUser(@PathVariable long id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<?>> login(@RequestBody UserRequestDto dto) {
+
+        var accessToken = userService.login(dto);
+        return ResponseEntity.ok(new ApiResponse<>(200,"로그인 성공" , accessToken));
     }
 
 }

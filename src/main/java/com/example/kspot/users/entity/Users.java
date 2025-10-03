@@ -34,6 +34,7 @@ public class Users {
     private String nickname;
     private String provider;
     private String password;
+    private String refreshToken;
 
     @CreatedDate
     private LocalDateTime createdAt;
