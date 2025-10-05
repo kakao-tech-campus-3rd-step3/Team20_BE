@@ -3,6 +3,7 @@ package com.example.kspot.itineraries.controller;
 import com.example.kspot.contents.dto.ApiResponse;
 import com.example.kspot.itineraries.dto.CreateItineraryRequest;
 import com.example.kspot.itineraries.dto.ItineraryResponseDto;
+import com.example.kspot.itineraries.entity.Itinerary;
 import com.example.kspot.itineraries.service.ItineraryService;
 import com.example.kspot.jwt.JwtProvider;
 import jakarta.servlet.http.HttpServletRequest;
@@ -51,6 +52,22 @@ public class ItineraryRestController {
     return ResponseEntity.status(HttpStatus.CREATED).body(
         new ApiResponse<>(201, "새로운 여행 계획이 생성되었습니다", response)
     );
+  }
+
+  @PutMapping("/{itinerayId}")
+  public ResponseEntity<ApiResponse<ItineraryResponseDto>> updateItinerary(
+      @PathVariable Long itinerayId,
+      @RequestBody CreateItineraryRequest request,
+      HttpServletRequest httpRequest
+  ){
+    Long userId = extractUserIdFromJwt(httpRequest);
+    if(userId == null){
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+          .body(new ApiResponse<>(401, "JWT 토큰이 유효하지 않습니다", null));
+    }
+    ItineraryResponseDto responseDto = itineraryService.updateItinerary(itinerayId, request, userId);
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(new ApiResponse<>(200, "여행계획이 업데이트 되었습니다", responseDto));
   }
 
   @DeleteMapping("/{itineraryId}")

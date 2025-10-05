@@ -16,7 +16,7 @@ public record ItineraryResponseDto(
     return new ItineraryResponseDto(
         itinerary.getItineraryId(),
         new UserSummaryResponse(
-            itinerary.getUserId(),
+            itinerary.getUser().getUserId(),
             null
         ),
         itinerary.getTitle(),
