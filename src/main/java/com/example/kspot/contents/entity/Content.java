@@ -72,6 +72,11 @@ public class Content {
 
   public List<ContentArtist> getContentArtists() { return contentArtists; }
   public List<ContentLocation> getContentLocations() { return contentLocations; }
-  // Setter는 현재 MVP에서는 필요없을 것이라 생각해 생략
-  // 이후, 관리자 페이지 생성시 필요해질 것으로 예상해 차후 추가예정
+
+  //setter
+  public void setContent_id(long content_id) {this.content_id = content_id;}
+  public void setCategory(String category) {this.category = category;}
+  public void setTitle(String title) {this.title = title;}
+  public void setPoster_image_url(String poster_image_url) {this.poster_image_url = poster_image_url;}
+  public void setPopularity(Double popularity) {this.popularity = popularity;}
 }
