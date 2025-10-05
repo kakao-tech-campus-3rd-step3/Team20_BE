@@ -4,6 +4,8 @@ import com.example.kspot.contents.dto.ApiResponse;
 import com.example.kspot.itineraries.dto.CreateItineraryRequest;
 import com.example.kspot.itineraries.dto.ItineraryResponseDto;
 import com.example.kspot.itineraries.service.ItineraryService;
+import com.example.kspot.jwt.JwtProvider;
+import jakarta.servlet.http.HttpServletRequest;
 import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,10 +21,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/itineraries")
 public class ItineraryRestController {
   private final ItineraryService itineraryService;
+  private final JwtProvider jwtProvider;
 
   @Autowired
-  public ItineraryRestController(ItineraryService itineraryService) {
+  public ItineraryRestController(ItineraryService itineraryService, JwtProvider jwtProvider) {
     this.itineraryService = itineraryService;
+    this.jwtProvider = jwtProvider;
   }
 
   @GetMapping("/{id}")
@@ -36,10 +40,26 @@ public class ItineraryRestController {
 
   @PostMapping
   public ResponseEntity<ApiResponse<ItineraryResponseDto>> createItinerary(
-      @RequestBody CreateItineraryRequest request
+      @RequestBody CreateItineraryRequest request,
+      HttpServletRequest httpRequest
   ){
-    Long userdId = 1L; // 현재 UserId를 주지않아서 임시로 사용. 차후에 JWT 토큰으로 변경예정
-    ItineraryResponseDto response = itineraryService.createItinerary(request, userdId);
+    // Authorization 헤더에서 JWT 추출
+    String authHeader = httpRequest.getHeader("Authorization");
+    if(authHeader == null || !authHeader.startsWith("Bearer ")){
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+          .body(new ApiResponse<>(401, "JWT 토큰이 없습니다.", null));
+    }
+
+    String token = authHeader.substring(7);
+    Long userId;
+    try{
+      userId = jwtProvider.validateToken(token);
+    }catch (Exception e){
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+          .body(new ApiResponse<>(401, "유효하지 않은 JWT 토큰입니다.", null));
+    }
+
+    ItineraryResponseDto response = itineraryService.createItinerary(request, userId);
     return ResponseEntity.status(HttpStatus.CREATED).body(
         new ApiResponse<>(201, "새로운 여행 계획이 생성되었습니다", response)
     );
