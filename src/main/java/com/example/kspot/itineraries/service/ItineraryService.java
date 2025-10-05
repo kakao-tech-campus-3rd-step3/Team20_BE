@@ -75,4 +75,14 @@ public class ItineraryService {
             )).toList()
     );
   }
+
+  public void deleteItinerary(Long itineraryId, Long userId) {
+    Itinerary itinerary = itineraryRepository.findById(itineraryId)
+        .orElseThrow(() -> new RuntimeException("존재하지 않는 여행 계획입니다"));
+
+    if(!itinerary.getUserId().equals(userId)) {
+      throw new RuntimeException("해당 계획에 대한 삭제 권한이 없습니다");
+    }
+    itineraryRepository.delete(itinerary);
+  }
 }
