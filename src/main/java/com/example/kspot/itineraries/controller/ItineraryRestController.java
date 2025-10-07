@@ -1,10 +1,9 @@
 package com.example.kspot.itineraries.controller;
 
-import com.example.kspot.contents.dto.ApiResponse;
+import com.example.kspot.contents.dto.ApiResponseDto;
 import com.example.kspot.itineraries.dto.CreateItineraryRequest;
 import com.example.kspot.itineraries.dto.ItineraryResponseDto;
 import com.example.kspot.itineraries.service.ItineraryService;
-import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,22 +25,22 @@ public class ItineraryRestController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<ApiResponse<ItineraryResponseDto>> getItinerary(@PathVariable Long id) {
+  public ResponseEntity<ApiResponseDto<ItineraryResponseDto>> getItinerary(@PathVariable Long id) {
     ItineraryResponseDto response = itineraryService.getItineraryById(id);
     return ResponseEntity.ok(
-        new ApiResponse<>(200, "여행 계획 상세 조회 성공", response)
+        new ApiResponseDto<>(200, "여행 계획 상세 조회 성공", response)
     );
   }
 
 
   @PostMapping
-  public ResponseEntity<ApiResponse<ItineraryResponseDto>> createItinerary(
+  public ResponseEntity<ApiResponseDto<ItineraryResponseDto>> createItinerary(
       @RequestBody CreateItineraryRequest request
   ){
     Long userdId = 1L; // 현재 UserId를 주지않아서 임시로 사용. 차후에 JWT 토큰으로 변경예정
     ItineraryResponseDto response = itineraryService.createItinerary(request, userdId);
     return ResponseEntity.status(HttpStatus.CREATED).body(
-        new ApiResponse<>(201, "새로운 여행 계획이 생성되었습니다", response)
+        new ApiResponseDto<>(201, "새로운 여행 계획이 생성되었습니다", response)
     );
   }
 }
