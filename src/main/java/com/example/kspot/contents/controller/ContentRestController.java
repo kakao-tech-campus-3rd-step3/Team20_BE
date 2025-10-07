@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -37,12 +38,18 @@ public class ContentRestController {
     this.contentService = contentService;
   }
 
-  // 1. 전체 컨텐츠 조회
+  // 1. 전체 콘텐츠 조회
+  @Operation(summary = "전체 콘텐츠 목록 조회", description = "모든 콘텐츠를 페이지네이션 형태로 조회합니다.")
+  @ApiResponses({
+          @ApiResponse(responseCode = "200", description = "콘텐츠 목록 조회 성공"),
+          @ApiResponse(responseCode = "401", description = "인증 실패 - 유효하지 않은 또는 누락된 토큰"),
+          @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+  })
   @GetMapping
   public ResponseEntity<ApiResponseDto<ContentListResponse>> getAllContents(Pageable pageable) {
     Page<Content> contentPage = contentService.getAllContents(pageable);
 
-    // 전체 컨텐츠들 간략정보 넣기
+    // 전체 콘텐츠들 간략정보 넣기
     List<ContentItemDto> items = contentPage.getContent().stream()
         .map(c -> new ContentItemDto(
             c.getContent_id(),
@@ -65,9 +72,17 @@ public class ContentRestController {
     return ResponseEntity.ok(response);
   }
 
-  // 2. id로 특정 컨텐츠 조회
+  // 2. id로 특정 콘텐츠 조회
+  @Operation(summary = "콘텐츠 상세 조회", description = "콘텐츠 ID를 이용해 상세 정보를 조회합니다.")
+  @ApiResponses({
+          @ApiResponse(responseCode = "200", description = "콘텐츠 상세 조회 성공"),
+          @ApiResponse(responseCode = "401", description = "인증 실패 - 유효하지 않은 또는 누락된 토큰"),
+          @ApiResponse(responseCode = "404", description = "콘텐츠를 찾을 수 없음"),
+          @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+  })
   @GetMapping("/{id}")
-  public ResponseEntity<ApiResponseDto<ContentDetailResponse>> getContentById(@PathVariable Long id) {
+  public ResponseEntity<ApiResponseDto<ContentDetailResponse>> getContentById(@Parameter(description = "조회할 콘텐츠의 고유 ID", example = "1")
+                                                                                @PathVariable Long id) {
     return contentService.getContentDetailWithArtists(id)
         .map(data -> {
           ApiResponseDto<ContentDetailResponse> reponse = new ApiResponseDto<>(200, "콘텐츠 상세 조회 성공", data);
@@ -79,9 +94,15 @@ public class ContentRestController {
         });
   }
 
-  // 3. title로 연관 컨텐츠 간략조회
+  // 3. title로 연관 콘텐츠 간략조회
+  @Operation(summary = "연관 콘텐츠 검색", description = "제목 키워드로 콘텐츠를 검색합니다.")
+  @ApiResponses({
+          @ApiResponse(responseCode = "200", description = "연관 콘텐츠 조회 성공"),
+          @ApiResponse(responseCode = "401", description = "인증 실패 - 유효하지 않은 또는 누락된 토큰"),
+          @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+  })
   @GetMapping("/search")
-  public ResponseEntity<ApiResponseDto<ContentListResponse>> getAllContentsByTitle(
+  public ResponseEntity<ApiResponseDto<ContentListResponse>> getAllContentsByTitle(@Parameter(description = "검색할 콘텐츠 제목 키워드", example = "오징어")
       @RequestParam String title,
       Pageable pageable
     ){
@@ -108,8 +129,15 @@ public class ContentRestController {
   }
 
   // 4. content id로 연관 location 조회
+  @Operation(summary = "콘텐츠 관련 장소 조회", description = "콘텐츠 ID로 관련 촬영 장소 목록을 조회합니다.")
+  @ApiResponses({
+          @ApiResponse(responseCode = "200", description = "콘텐츠 관련 장소 조회 성공"),
+          @ApiResponse(responseCode = "401", description = "인증 실패 - 유효하지 않은 또는 누락된 토큰"),
+          @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+  })
   @GetMapping("{id}/related-location")
-  public ResponseEntity<ApiResponseDto<List<ContentLocationResponse>>> getRelatedLocations(@PathVariable("id") Long contentId) {
+  public ResponseEntity<ApiResponseDto<List<ContentLocationResponse>>> getRelatedLocations( @Parameter(description = "콘텐츠의 고유 ID", example = "1")
+                                                                                              @PathVariable("id") Long contentId) {
     List<ContentLocationResponse> locations = contentService.getRelatedLocations(contentId);
 
     ApiResponseDto<List<ContentLocationResponse>> response = new ApiResponseDto<>(
@@ -121,11 +149,20 @@ public class ContentRestController {
     return ResponseEntity.ok(response);
   }
 
-  //5.인기 컨텐츠 조회(전체/카테고리)
+  //5.인기 콘텐츠 조회(전체/카테고리)
+  @Operation(summary = "인기 콘텐츠 조회", description = "카테고리별 혹은 전체 인기 콘텐츠를 조회합니다.")
+  @ApiResponses({
+          @ApiResponse(responseCode = "200", description = "인기 콘텐츠 조회 성공"),
+          @ApiResponse(responseCode = "401", description = "인증 실패 - 유효하지 않은 또는 누락된 토큰"),
+          @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+  })
   @GetMapping("/popular")
   public ResponseEntity<ApiResponseDto<ContentListResponse>> getPopularContents(
+          @Parameter(description = "카테고리 필터 (예: drama, movie 등), 생략 시 전체 인기 순위", example = "drama")
           @RequestParam(required = false) String category,
+          @Parameter(description = "페이지 번호 (0부터 시작)", example = "0")
           @RequestParam(defaultValue = "0") int page,
+          @Parameter(description = "페이지당 콘텐츠 개수", example = "20")
           @RequestParam(defaultValue = "20") int size
   ) {
       Page<ContentItemDto> contents = contentService.getPopularContents(category, page, size);
