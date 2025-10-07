@@ -26,7 +26,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String uri = request.getRequestURI();
 
-        filterChain.doFilter(request, response);
+        if (uri.startsWith("/swagger-ui")
+                || uri.startsWith("/v3/api-docs")
+                || uri.startsWith("/swagger-resources")
+                || uri.startsWith("/webjars")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        //filterChain.doFilter(request, response);
 
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
