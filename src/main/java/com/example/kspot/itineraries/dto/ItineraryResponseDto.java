@@ -17,7 +17,7 @@ public record ItineraryResponseDto(
         itinerary.getItineraryId(),
         new UserSummaryResponse(
             itinerary.getUser().getUserId(),
-            null
+            itinerary.getUser().getNickname()
         ),
         itinerary.getTitle(),
         itinerary.getDescription(),
