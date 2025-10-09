@@ -28,6 +28,7 @@ public class SwaggerConfig {
             .description("K-SPOT HTTPS 서버");
 
         return new OpenAPI()
+                .addServersItem(server)
                 .info(new Info()
                         .title("K-SPOT API 명세서")
                         .description("K-SPOT API 문서입니다.")
