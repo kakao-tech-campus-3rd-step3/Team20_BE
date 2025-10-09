@@ -1,5 +1,6 @@
 package com.example.kspot.config;
 
+import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -21,6 +22,10 @@ public class SwaggerConfig {
                 .bearerFormat("JWT");
 
         SecurityRequirement securityRequirement = new SecurityRequirement().addList("bearerAuth");
+
+        Server server = new Server()
+            .url("https://k-spot.kro.kr")
+            .description("K-SPOT HTTPS 서버");
 
         return new OpenAPI()
                 .info(new Info()
