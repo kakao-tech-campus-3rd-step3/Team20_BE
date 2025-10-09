@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -57,6 +58,25 @@ public class ItineraryRestController {
     ItineraryResponseDto response = itineraryService.getItineraryById(id);
     return ResponseEntity.ok(
         new ApiResponseDto<>(200, "여행 계획 상세 조회 성공", response)
+    );
+  }
+
+  @Operation(
+      summary = "사용자가 등록한 여행 일정 목록 조회",
+      description = "특정 사용자의 ID를 사용해, 해당 사용자가 등록한 모든 일정 조회"
+  )
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "사용자 여행 일정 목록 조회 성공"),
+      @ApiResponse(responseCode = "404", description = "해당 사용자 ID가 존재하지 않는 경우")
+  })
+  @GetMapping("/user/{userId}")
+  public ResponseEntity<ApiResponseDto<List<ItineraryResponseDto>>> getItinerariesByUserId(
+      @Parameter(description = "조회할 사용자 ID")
+      @PathVariable Long userId
+  ){
+    List<ItineraryResponseDto> itineraries = itineraryService.getItinerariesByUserId(userId);
+    return ResponseEntity.ok(
+        new ApiResponseDto<>(200, "사용자 여행 일정 목록 조회 성공", itineraries)
     );
   }
 

@@ -53,6 +53,15 @@ public class ItineraryService {
         .orElseThrow(() -> new ItineraryNotFoundException("존재하지 않는 여행계획 입니다"));
   }
 
+  public List<ItineraryResponseDto> getItinerariesByUserId(Long userId) {
+    List<Itinerary> itineraryList = itineraryRepository.findByUser_UserId(userId);
+
+    return itineraryList.stream()
+        .map(ItineraryResponseDto::fromEntity)
+        .toList();
+  }
+
+
 
   public ItineraryResponseDto createItinerary(CreateItineraryRequest request, Long userId) {
     Users user = userRepository.findById(userId)
