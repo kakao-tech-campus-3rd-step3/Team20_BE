@@ -99,7 +99,17 @@ public class ItinerariesControllerTest {
   }
 
   @Test
-  @DisplayName("3. 새로운 여행계획 추가 성공")
+  @DisplayName("3. userId로 연관 여행계획 조회 성공")
+  void getItineraryByUserId_success() throws Exception {
+    mockMvc.perform(get("/itineraries/user/{userId}", 1))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data").isArray())
+        .andExpect(jsonPath("$.message").value("사용자 여행 일정 목록 조회 성공"))
+        .andExpect(jsonPath("$.status").value(200));
+  }
+
+  @Test
+  @DisplayName("4. 새로운 여행계획 추가 성공")
   void postItinerary_success() throws Exception {
 
     String requestJson = """
