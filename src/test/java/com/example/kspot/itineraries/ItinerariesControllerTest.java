@@ -9,6 +9,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.kspot.itineraries.entity.Itinerary;
 import com.example.kspot.itineraries.repository.ItineraryRepository;
 import com.example.kspot.locations.repository.LocationRepository;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,6 +21,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -37,14 +40,39 @@ public class ItinerariesControllerTest {
   @Autowired
   private LocationRepository locationRepository;
 
+  @Autowired
+  private ObjectMapper objectMapper;
+
+  private String jwtToken;
+
   //테이블에 데이터가 존재하는지 여부 + 데이터에 필수 칼럼(itierary_id 확인)
   @BeforeEach
-  void setUp() {
+  void checkTable() {
     Optional<Itinerary> existingItinerary = itineraryRepository.findAll().stream().findFirst();
     assertThat(existingItinerary).isPresent()
         .withFailMessage("Itinerary 테이블 내 데이터가 하나도 없습니다");
     Itinerary itinerary = existingItinerary.get();
     existingItineraryId = itinerary.getItineraryId();
+  }
+
+  @BeforeEach
+  void login() throws Exception{
+    String loginJson = """
+        {
+            "email" : "jaeho@naver.com",
+            "nickname" : "재호",
+            "password" : "123456789"
+        }
+        """;
+    MvcResult result = mockMvc.perform(post("/api/users/login")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(loginJson))
+        .andExpect(status().isOk())
+        .andReturn();
+
+    String responseBody = result.getResponse().getContentAsString();
+    JsonNode jsonNode = objectMapper.readTree(responseBody);
+    jwtToken = jsonNode.path("data").path("token").asText(); // 예: {"token":"eyJhbGciOiJI..."}
   }
 
   @Test
@@ -71,7 +99,17 @@ public class ItinerariesControllerTest {
   }
 
   @Test
-  @DisplayName("3. 새로운 여행계획 추가 성공")
+  @DisplayName("3. userId로 연관 여행계획 조회 성공")
+  void getItineraryByUserId_success() throws Exception {
+    mockMvc.perform(get("/itineraries/user/{userId}", 1))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data").isArray())
+        .andExpect(jsonPath("$.message").value("사용자 여행 일정 목록 조회 성공"))
+        .andExpect(jsonPath("$.status").value(200));
+  }
+
+  @Test
+  @DisplayName("4. 새로운 여행계획 추가 성공")
   void postItinerary_success() throws Exception {
 
     String requestJson = """
@@ -84,8 +122,8 @@ public class ItinerariesControllerTest {
               ]
             }
             """;
-
     mockMvc.perform(post("/itineraries")
+            .header("Authorization", "Bearer " + jwtToken)
             .contentType(MediaType.APPLICATION_JSON)
             .content(requestJson))
         .andExpect(status().isCreated())

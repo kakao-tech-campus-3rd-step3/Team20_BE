@@ -32,9 +32,17 @@ public class Users {
 
     @Column(nullable = false)
     private String nickname;
+
     private String provider;
+
+    @Column(nullable = false)
     private String password;
+
+    private String accessToken;
     private String refreshToken;
+
+    @Column(nullable = false)
+    private boolean emailVerified = false;
 
     @CreatedDate
     private LocalDateTime createdAt;
