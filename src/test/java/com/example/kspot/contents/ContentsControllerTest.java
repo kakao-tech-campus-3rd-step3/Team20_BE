@@ -53,11 +53,11 @@ public class ContentsControllerTest {
   }
 
   @Test
-  @DisplayName("2. 특정 컨텐츠 id로 조회 성공-7")
+  @DisplayName("2. 특정 컨텐츠 id로 조회 성공-496243")
   void getContentById_success() throws Exception {
-    mockMvc.perform(get("/contents/{id}", 7))
+    mockMvc.perform(get("/contents/{id}", 496243))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.data.contentId").value("7"))
+        .andExpect(jsonPath("$.data.contentId").value("496243"))
         .andExpect(jsonPath("$.data.releaseDate").value("2019-05-30T00:00:00"))
         .andExpect(jsonPath("$.data.category").value("MOVIE"))
         .andExpect(jsonPath("$.data.title").value("기생충"))
