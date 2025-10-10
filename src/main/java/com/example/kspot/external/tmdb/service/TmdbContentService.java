@@ -14,7 +14,10 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
+import lombok.extern.slf4j.Slf4j;
 
+
+@Slf4j
 @Component
 public class TmdbContentService {
 
@@ -79,6 +82,7 @@ public class TmdbContentService {
 
     JSONObject item = results.getJSONObject(0);
     Long contentId = item.getLong("id");
+    String mediaType = item.optString("media_type", category); // movie or tv
     String title = item.optString("title", item.optString("name", "제목없음"));
     String posterPath = item.optString("poster_path", null);
     String backdropPath = item.optString("backdrop_path", null);
@@ -100,5 +104,55 @@ public class TmdbContentService {
                 """,
         contentId, category, title, posterUrl, releaseDate, popularity, backdropUrl
     );
+    log.info("✅ 컨텐츠 삽입 완료: {} ({})", contentId, mediaType);
+    insertContentArtists(contentId, mediaType);
+  }
+
+  private void insertContentArtists(Long contentId, String mediaType) throws IOException, JSONException {
+    String creditsUrl = String.format(
+        "https://api.themoviedb.org/3/%s/%d/credits?language=ko-KR",
+        mediaType.equalsIgnoreCase("tv") ? "tv" : "movie", contentId
+    );
+
+    Request request = new Request.Builder()
+        .url(creditsUrl)
+        .get()
+        .addHeader("accept", "application/json")
+        .addHeader("Authorization", "Bearer " + tmdbApiToken)
+        .build();
+
+    Response response = client.newCall(request).execute();
+    if (!response.isSuccessful()) {
+      log.info("⚠️ 출연진 불러오기 실패: {} ({})", contentId, mediaType);
+      return;
+    }
+
+    JSONObject json = new JSONObject(response.body().string());
+    JSONArray castArray = json.optJSONArray("cast");
+    if (castArray == null || castArray.length() == 0) {
+      log.info("ℹ️ 출연진 없음: {} ({})", contentId, mediaType);
+      return;
+    }
+
+    for (int i = 0; i < castArray.length(); i++) {
+      JSONObject cast = castArray.getJSONObject(i);
+      Long artistId = cast.optLong("id", -1);
+      if (artistId == -1) continue;
+
+      // ✅ artist_id가 존재하는 경우만 삽입
+      int exists = jdbcTemplate.queryForObject(
+          "SELECT COUNT(*) FROM artists WHERE artist_id = ?",
+          Integer.class,
+          artistId
+      );
+      if (exists == 0) continue;
+
+      jdbcTemplate.update("""
+              INSERT IGNORE INTO content_artist (content_id, artist_id)
+              VALUES (?, ?)
+              """, contentId, artistId);
+    }
+
+    log.info("✅ 출연진 삽입 완료: {} ({})", contentId, mediaType);
   }
 }

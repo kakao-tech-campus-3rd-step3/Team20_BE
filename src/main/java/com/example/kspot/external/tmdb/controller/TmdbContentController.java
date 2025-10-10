@@ -16,6 +16,6 @@ public class TmdbContentController {
   @GetMapping("/api/tmdb/content/load")
   public String loadTmdbData() throws Exception {
     loader.loadContentsFromFile();
-    return "✅ TMDB에서 Content 데이터 로딩 완료!";
+    return "✅ TMDB에서 Content관련 데이터(artist 연계 포함) 로딩 완료!";
   }
 }
