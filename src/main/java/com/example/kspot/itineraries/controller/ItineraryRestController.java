@@ -104,9 +104,9 @@ public class ItineraryRestController {
     );
   }
 
-  @PutMapping("/{itinerayId}")
+  @PutMapping("/{itineraryId}")
   public ResponseEntity<ApiResponseDto<ItineraryResponseDto>> updateItinerary(
-      @PathVariable Long itinerayId,
+      @PathVariable Long itineraryId,
       @RequestBody CreateItineraryRequest request,
       HttpServletRequest httpRequest
   ) {
@@ -115,14 +115,14 @@ public class ItineraryRestController {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
           .body(new ApiResponseDto<>(401, "JWT 토큰이 유효하지 않습니다", null));
     }
-    ItineraryResponseDto responseDto = itineraryService.updateItinerary(itinerayId, request,
+    ItineraryResponseDto responseDto = itineraryService.updateItinerary(itineraryId, request,
         userId);
     return ResponseEntity.status(HttpStatus.OK)
         .body(new ApiResponseDto<>(200, "여행계획이 업데이트 되었습니다", responseDto));
   }
 
   @DeleteMapping("/{itineraryId}")
-  public ResponseEntity<ApiResponseDto<ItineraryResponseDto>> updateItinerary(
+  public ResponseEntity<ApiResponseDto<ItineraryResponseDto>> deleteItinerary(
       @PathVariable Long itineraryId,
       HttpServletRequest httpRequest
   ) {
