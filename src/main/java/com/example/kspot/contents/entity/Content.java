@@ -46,6 +46,9 @@ public class Content {
   @Column(name = "popularity")
   private Double popularity;
 
+  @Column(name = "english_title")
+  private String english_title;
+
   // KSPOT 서비스에서 생성되는 정보(생성날짜, 업데이트된 날짜)
   @CreationTimestamp
   @Column(updatable = false, name = "created_at")
