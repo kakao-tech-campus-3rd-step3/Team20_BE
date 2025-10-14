@@ -134,7 +134,7 @@ public class ItineraryService {
 
     return new ItineraryResponseDto(
         saved.getItineraryId(),
-        new UserSummaryResponse(userId, "Test Nick Name"),
+        new UserSummaryResponse(userId, itinerary.getUser().getNickname()),
         saved.getTitle(),
         saved.getDescription(),
         saved.getCreated_at(),
