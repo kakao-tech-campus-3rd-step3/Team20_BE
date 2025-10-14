@@ -14,22 +14,16 @@ import com.example.kspot.locations.entity.Location;
 import com.example.kspot.locations.repository.LocationRepository;
 import com.example.kspot.users.entity.Users;
 import com.example.kspot.users.repository.UserRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ItineraryService {
-
-  @PersistenceContext
-  private EntityManager entityManager;
 
   private final ItineraryRepository itineraryRepository;
   private final LocationRepository locationRepository;
@@ -60,7 +54,6 @@ public class ItineraryService {
         .map(ItineraryResponseDto::fromEntity)
         .toList();
   }
-
 
 
   public ItineraryResponseDto createItinerary(CreateItineraryRequest request, Long userId) {
@@ -105,7 +98,8 @@ public class ItineraryService {
   }
 
   @Transactional
-  public ItineraryResponseDto updateItinerary(Long itineraryId, CreateItineraryRequest request, Long userId) {
+  public ItineraryResponseDto updateItinerary(Long itineraryId, CreateItineraryRequest request,
+      Long userId) {
     Itinerary itinerary = itineraryRepository.findById(itineraryId)
         .orElseThrow(() -> new ItineraryNotFoundException("존재하지 않는 여행계획 입니다"));
 
@@ -149,12 +143,11 @@ public class ItineraryService {
   }
 
 
-
   public void deleteItinerary(Long itineraryId, Long userId) {
     Itinerary itinerary = itineraryRepository.findById(itineraryId)
         .orElseThrow(() -> new ItineraryNotFoundException("존재하지 않는 여행 계획입니다"));
 
-    if(!itinerary.getUser().getUserId().equals(userId)) {
+    if (!itinerary.getUser().getUserId().equals(userId)) {
       throw new RuntimeException("해당 계획에 대한 삭제 권한이 없습니다");
     }
     itineraryRepository.delete(itinerary);
