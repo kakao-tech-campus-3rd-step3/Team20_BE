@@ -24,7 +24,7 @@ public class SwaggerConfig {
         SecurityRequirement securityRequirement = new SecurityRequirement().addList("bearerAuth");
 
         Server server = new Server()
-            .url("https://k-spot.kro.kr")
+            .url("${kspot.server.url}")
             .description("K-SPOT HTTPS 서버");
 
         return new OpenAPI()
