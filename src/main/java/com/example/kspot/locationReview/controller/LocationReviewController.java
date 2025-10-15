@@ -150,7 +150,7 @@ public class LocationReviewController {
       @RequestBody CreateLocationReviewRequest request,
       HttpServletRequest httpRequest
   ) {
-    Long userId = extractUserIdFromJwt(httpRequest);
+    Long userId = jwtProvider.extractUserIdFromRequest(httpRequest);
     if (userId == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
           .body(new ApiResponseDto<>(401, "JWT 토큰이 유효하지 않습니다", null));
@@ -180,7 +180,7 @@ public class LocationReviewController {
       @RequestBody CreateLocationReviewRequest request,
       HttpServletRequest httpRequest
   ) {
-    Long userId = extractUserIdFromJwt(httpRequest);
+    Long userId = jwtProvider.extractUserIdFromRequest(httpRequest);
     if (userId == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
           .body(new ApiResponseDto<>(401, "JWT 토큰이 유효하지 않습니다", null));
@@ -205,27 +205,12 @@ public class LocationReviewController {
   public ResponseEntity<ApiResponseDto<LocationReviewDto>> deleteLoctionReview(
       @PathVariable Long locationReviewId,
       HttpServletRequest httpRequest){
-    Long userId = extractUserIdFromJwt(httpRequest);
+    Long userId = jwtProvider.extractUserIdFromRequest(httpRequest);
     if (userId == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
           .body(new ApiResponseDto<>(401, "JWT 토큰이 유효하지 않습니다", null));
     }
     locationReviewService.deleteReview(userId, locationReviewId);
     return ResponseEntity.ok(new ApiResponseDto<>(200, "리뷰가 정상적으로 삭제되었습니다", null));
-  }
-
-  // JWT로부터 userId 추출하는 method
-  private Long extractUserIdFromJwt(HttpServletRequest request) {
-    String authHeader = request.getHeader("Authorization");
-    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-      return null;
-    }
-
-    String token = authHeader.substring(7);
-    try {
-      return jwtProvider.validateToken(token);
-    } catch (Exception e) {
-      return null;
-    }
   }
 }
