@@ -1,14 +1,17 @@
 package com.example.kspot.artists.controller;
 
 import com.example.kspot.artists.service.ArtistsService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+@Tag(name="Artists", description = "아티스트 관련 API")
 @RestController
 @RequestMapping("/api/artists")
 public class ArtistsController {
@@ -19,6 +22,12 @@ public class ArtistsController {
         this.artistsService = artistsService;
     }
 
+    @Operation(summary = "아티스트 목록 조회", description = "전체 아티스트 목록을 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",description = "아티스트 전체 목록 조회 성공"),
+            @ApiResponse(responseCode = "401",description = "인증 실패 - 유효하지 않은 또는 누락된 토큰"),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+    })
     @GetMapping()
     public ResponseEntity<Map<String,Object>> getArtists() {
 
@@ -31,8 +40,17 @@ public class ArtistsController {
         return ResponseEntity.ok(body);
     }
 
+
+    @Operation(summary = "특정 아티스트 조회",
+            description = "아티스트 ID를 이용해 특정 아티스트의 상세 정보를 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",description = "아티스트 조회 성공"),
+            @ApiResponse(responseCode = "401",description = "인증 실패 - 유효하지 않은 또는 누락된 토큰"),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> getArtistById(@PathVariable Long id) {
+    public ResponseEntity<Map<String, Object>> getArtistById(@Parameter(description = "조회할 아티스트의 고유ID", example = "1")
+                                                                 @PathVariable Long id) {
 
         Map<String, Object> body = Map.of(
                 "status", 200,

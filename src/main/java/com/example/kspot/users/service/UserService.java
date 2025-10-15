@@ -39,6 +39,8 @@ public class UserService {
                 user.password(),
                 null,
                 null,
+                false,
+                null,
                 null
         );
         userRepository.save(users);
