@@ -1,6 +1,7 @@
 package com.example.kspot.email.service;
 
 import com.example.kspot.email.entity.EmailVerificationToken;
+import com.example.kspot.email.exception.TokenNotFoundException;
 import com.example.kspot.email.repository.EmailVerificationTokenRepository;
 import com.example.kspot.users.entity.Users;
 import com.example.kspot.users.repository.UserRepository;
@@ -43,14 +44,20 @@ public class EmailVerificationService {
     @Transactional
     public void verifyByRawToken(String rawToken) {
         byte[] hash = tokenProvider.sha256(rawToken);
-        EmailVerificationToken t = tokenRepository.findActiveByHash(hash, LocalDateTime.now())
-                .orElseThrow(() -> new IllegalArgumentException("일치하지 않거나 토큰이 유효하지 않습니다."));
+        EmailVerificationToken t = tokenRepository.findByTokenHash(hash)
+                .orElseThrow(() -> new TokenNotFoundException(hash));
+
+        //시간 만료 검증
+        LocalDateTime now = LocalDateTime.now();
+        t.assertUsable(now);
 
         Users user = t.getUser();
+
         if (!user.isEmailVerified()) {
             user.setEmailVerified(true);
             userRepository.save(user);
         }
+
         t.setUsed(true);
         tokenRepository.save(t);
     }

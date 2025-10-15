@@ -1,5 +1,7 @@
 package com.example.kspot.email.entity;
 
+import com.example.kspot.email.exception.ExpiredTokenException;
+import com.example.kspot.email.exception.TokenAlreadyUsedException;
 import com.example.kspot.users.entity.Users;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -34,6 +36,16 @@ public class EmailVerificationToken {
 
     @Column(nullable = false)
     private LocalDateTime lastSentAt = LocalDateTime.now();
+
+    public void assertUsable(LocalDateTime now) {
+        if (used) {
+            throw new TokenAlreadyUsedException();
+        }
+
+        if (now.isAfter(expiresAt)) {
+            throw new ExpiredTokenException(expiresAt);
+        }
+    }
 
 }
 
