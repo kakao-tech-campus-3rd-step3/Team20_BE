@@ -26,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -162,6 +163,17 @@ public class LocationReviewController {
     );
   }
 
+  @Operation(
+      summary = "리뷰 수정",
+      description = "사용자의 요청 정보를 기반으로 리뷰를 수정합니다."
+  )
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "리뷰 수정 성공",
+          content = @Content(schema = @Schema(implementation = LocationReviewDto.class))),
+      @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
+      @ApiResponse(responseCode = "401", description = "인증 실패 - 유효하지 않은 또는 누락된 토큰"),
+      @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+  })
   @PutMapping("/{loctionReviewId}")
   public ResponseEntity<ApiResponseDto<LocationReviewDto>> updateItinerary(
       @PathVariable Long loctionReviewId,
@@ -178,6 +190,28 @@ public class LocationReviewController {
         locationReviewService.updateReview(userId, loctionReviewId, request));
     return ResponseEntity.status(HttpStatus.OK)
         .body(new ApiResponseDto<>(200, "여행계획이 업데이트 되었습니다", response));
+  }
+
+  @Operation(
+      summary = "리뷰 삭제",
+      description = "기존에 존재하던 리뷰를 삭제합니다."
+  )
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "리뷰 삭제 성공"),
+      @ApiResponse(responseCode = "401", description = "인증 실패 - 유효하지 않은 또는 누락된 토큰"),
+      @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+  })
+  @DeleteMapping("/{locationReviewId}")
+  public ResponseEntity<ApiResponseDto<LocationReviewDto>> deleteLoctionReview(
+      @PathVariable Long locationReviewId,
+      HttpServletRequest httpRequest){
+    Long userId = extractUserIdFromJwt(httpRequest);
+    if (userId == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+          .body(new ApiResponseDto<>(401, "JWT 토큰이 유효하지 않습니다", null));
+    }
+    locationReviewService.deleteReview(userId, locationReviewId);
+    return ResponseEntity.ok(new ApiResponseDto<>(200, "리뷰가 정상적으로 삭제되었습니다", null));
   }
 
   // JWT로부터 userId 추출하는 method
