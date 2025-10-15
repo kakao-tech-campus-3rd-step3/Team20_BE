@@ -62,7 +62,7 @@ public class LocationReviewService {
   }
 
   // userID + ReviewId를 통한 리뷰 수정
-  public LocationReview updateReview(Long userId, Long reviewId, LocationReview updateReview) {
+  public LocationReview updateReview(Long userId, Long reviewId, CreateLocationReviewRequest updateReview) {
     LocationReview existingReview = locationReviewRepository.findByReviewId(reviewId)
         .orElseThrow(() -> new LocationReviewNotFoundException("리뷰를 찾을 수 없습니다"));
 
@@ -70,9 +70,10 @@ public class LocationReviewService {
       throw new SecurityException("본인의 리뷰만 수정할 수 있습니다");
     }
 
-    existingReview.setTitle(updateReview.getTitle());
-    existingReview.setDetail(updateReview.getDetail());
-    existingReview.setRating(updateReview.getRating());
+    existingReview.setTitle(updateReview.title());
+    existingReview.setDetail(updateReview.detail());
+    existingReview.setLocationId(updateReview.locationId());
+    existingReview.setRating(updateReview.rating());
     existingReview.setUpdatedAt(LocalDateTime.now());
 
     return locationReviewRepository.save(existingReview);

@@ -2,8 +2,6 @@ package com.example.kspot.locationReview.controller;
 
 import com.example.kspot.contents.dto.ApiResponseDto;
 import com.example.kspot.contents.dto.PaginationDto;
-import com.example.kspot.itineraries.dto.CreateItineraryRequest;
-import com.example.kspot.itineraries.dto.ItineraryResponseDto;
 import com.example.kspot.jwt.JwtProvider;
 import com.example.kspot.locationReview.dto.CreateLocationReviewRequest;
 import com.example.kspot.locationReview.dto.LocationReviewDto;
@@ -31,6 +29,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -151,12 +150,34 @@ public class LocationReviewController {
       HttpServletRequest httpRequest
   ) {
     Long userId = extractUserIdFromJwt(httpRequest);
+    if (userId == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+          .body(new ApiResponseDto<>(401, "JWT 토큰이 유효하지 않습니다", null));
+    }
 
     LocationReviewDto response = LocationReviewDto.fromEntity(
         locationReviewService.createReview(request, userId));
     return ResponseEntity.status(HttpStatus.CREATED).body(
         new ApiResponseDto<>(201, "새로운 여행 계획이 생성되었습니다", response)
     );
+  }
+
+  @PutMapping("/{loctionReviewId}")
+  public ResponseEntity<ApiResponseDto<LocationReviewDto>> updateItinerary(
+      @PathVariable Long loctionReviewId,
+      @RequestBody CreateLocationReviewRequest request,
+      HttpServletRequest httpRequest
+  ) {
+    Long userId = extractUserIdFromJwt(httpRequest);
+    if (userId == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+          .body(new ApiResponseDto<>(401, "JWT 토큰이 유효하지 않습니다", null));
+    }
+
+    LocationReviewDto response = LocationReviewDto.fromEntity(
+        locationReviewService.updateReview(userId, loctionReviewId, request));
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(new ApiResponseDto<>(200, "여행계획이 업데이트 되었습니다", response));
   }
 
   // JWT로부터 userId 추출하는 method
