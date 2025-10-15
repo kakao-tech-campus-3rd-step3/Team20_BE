@@ -58,7 +58,7 @@ public class ContentService {
 
   //인기순 조회 (전체 or 카테고리별)
   public Page<ContentItemDto> getPopularContents(String category, int page, int size){
-    Pageable pageable = PageRequest.of(page, size, Sort.by("Popularity").descending());
+    Pageable pageable = PageRequest.of(page, size, Sort.by("popularity").descending());
 
     Page<Content> contents;
     if(category == null || category.isBlank()){
