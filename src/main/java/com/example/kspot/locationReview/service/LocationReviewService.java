@@ -1,28 +1,54 @@
 package com.example.kspot.locationReview.service;
 
+import com.example.kspot.locationReview.dto.CreateLocationReviewRequest;
 import com.example.kspot.locationReview.entity.LocationReview;
 import com.example.kspot.locationReview.exception.LocationReviewNotFoundException;
 import com.example.kspot.locationReview.repository.LocationReviewRepository;
+import com.example.kspot.locations.exception.LocationNotFoundException;
+import com.example.kspot.locations.repository.LocationRepository;
+import com.example.kspot.users.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
 public class LocationReviewService {
 
   private final LocationReviewRepository locationReviewRepository;
+  private final UserRepository userRepository;
+  private final LocationRepository locationRepository;
 
   @Autowired
-  public LocationReviewService(LocationReviewRepository locationReviewRepository) {
+  public LocationReviewService(LocationReviewRepository locationReviewRepository,
+      UserRepository userRepository, LocationRepository locationRepository) {
     this.locationReviewRepository = locationReviewRepository;
+    this.userRepository = userRepository;
+    this.locationRepository = locationRepository;
   }
 
   // 리뷰 생성
-  public LocationReview createReview(LocationReview review) {
-    return locationReviewRepository.save(review);
+  public LocationReview createReview(CreateLocationReviewRequest request, Long userId) {
+
+    userRepository.findById(userId)
+        .orElseThrow(() -> new UsernameNotFoundException("해당 유저가 존재하지 않습니다"));
+
+    locationRepository.findById(request.locationId())
+        .orElseThrow(() -> new LocationNotFoundException(request.locationId()));
+
+    LocationReview lR = new LocationReview();
+    lR.setLocationId(request.locationId());
+    lR.setUserId(userId);
+    lR.setTitle(request.title());
+    lR.setDetail(request.detail());
+    lR.setRating(request.rating());
+    lR.setCreatedAt(LocalDateTime.now());
+    lR.setUpdatedAt(LocalDateTime.now());
+
+    return locationReviewRepository.save(lR);
   }
 
   // ReviewId를 통한 리뷰 조회
