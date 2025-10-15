@@ -22,8 +22,8 @@ public class EmailVerificationToken {
     @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 
-    @Column(name = "tokenHash", nullable = false, length = 32)
-    private byte[] tokenHash;
+    @Column(name = "token_hash_hex", nullable = false, length = 32)
+    private String tokenHashHex;
 
     @Column(nullable = false)
     private LocalDateTime expiresAt;

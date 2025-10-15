@@ -15,6 +15,6 @@ public interface EmailVerificationTokenRepository extends JpaRepository<EmailVer
     @Query("update EmailVerificationToken t set t.used = true where t.user.userId = :userId and t.used = false")
     int invalidateAllActiveByUserId(@Param("userId") Long userId);
 
-    Optional<EmailVerificationToken> findByTokenHash(byte[] tokenHash);
+    Optional<EmailVerificationToken> findByTokenHashHex(String tokenHashHex);
 
 }

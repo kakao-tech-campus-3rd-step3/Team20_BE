@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HexFormat;
 
 @Service
 @RequiredArgsConstructor
@@ -26,15 +27,15 @@ public class EmailVerificationService {
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다"));
         if (user.isEmailVerified()) return;
 
-
         tokenRepository.invalidateAllActiveByUserId(userId);
 
         String raw = tokenProvider.newRawToken();
         byte[] hash = tokenProvider.sha256(raw);
+        String hex = HexFormat.of().formatHex(hash).toLowerCase();
 
         EmailVerificationToken token = new EmailVerificationToken();
         token.setUser(user);
-        token.setTokenHash(hash);
+        token.setTokenHashHex(hex);
         token.setExpiresAt(LocalDateTime.now().plusMinutes(15));
         tokenRepository.save(token);
 
@@ -44,8 +45,9 @@ public class EmailVerificationService {
     @Transactional
     public void verifyByRawToken(String rawToken) {
         byte[] hash = tokenProvider.sha256(rawToken);
-        EmailVerificationToken t = tokenRepository.findByTokenHash(hash)
-                .orElseThrow(() -> new TokenNotFoundException(hash));
+        String hex = HexFormat.of().formatHex(hash).toLowerCase();
+        EmailVerificationToken t = tokenRepository.findByTokenHashHex(hex)
+                .orElseThrow(() -> new TokenNotFoundException(hex));
 
         //시간 만료 검증
         LocalDateTime now = LocalDateTime.now();
