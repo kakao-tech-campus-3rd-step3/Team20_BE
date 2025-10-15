@@ -90,16 +90,16 @@ public class ContentPopularControllerTest {
     }
 
     @Test
-    @DisplayName("3.존재하지 않는 카테고리 조회 시 예외 발생")
-    void getPopularContents_invalidCategory() {
-        Exception exception = assertThrows(Exception.class, () ->
-                mockMvc.perform(get("/contents/popular")
-                                .param("category", "KPOP")
-                                .param("page", "0")
-                                .param("size", "20")
-                                .accept(MediaType.APPLICATION_JSON))
-                        .andReturn()
-        );
-        assertTrue(exception.getMessage().contains("해당 카테고리의 콘텐츠가 없습니다."));
+    @DisplayName("3.존재하지 않는 카테고리 조회 시 빈 리스트 반환")
+    void getPopularContents_invalidCategory() throws Exception{
+        mockMvc.perform(get("/contents/popular")
+                        .param("category", "KPOP")
+                        .param("page", "0")
+                        .param("size", "20")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.message").value("인기 콘텐츠 조회 성공"))
+                .andExpect(jsonPath("$.data.items").isEmpty());
     }
 }
