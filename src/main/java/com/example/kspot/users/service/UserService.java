@@ -1,23 +1,25 @@
 package com.example.kspot.users.service;
 
+import com.example.kspot.email.service.EmailVerificationService;
 import com.example.kspot.jwt.JwtProvider;
 import com.example.kspot.users.dto.*;
 import com.example.kspot.users.entity.Users;
+import com.example.kspot.users.exception.NotEmailVerifiedException;
 import com.example.kspot.users.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
     private final JwtProvider jwtProvider;
-
-    public UserService(UserRepository userRepository , JwtProvider jwtProvider) {
-        this.userRepository = userRepository;
-        this.jwtProvider = jwtProvider;
-    }
+    private final EmailVerificationService emailVerificationService;
 
     public List<UserInfoResponseDto> getUsers(){
         return userRepository.findAll().stream().map(UserInfoResponseDto::fromEntity).toList();
@@ -29,7 +31,8 @@ public class UserService {
         //Todo 사용브랜치에 전역예외처리 클래스가 없어 추후 예외처리할 예정
     }
 
-    public UserResponseDto register(UserRequestDto user) {
+    @Transactional
+    public void register(UserRequestDto user) {
 
         Users users = new Users(
                 null,
@@ -45,13 +48,10 @@ public class UserService {
         );
         userRepository.save(users);
 
-        String accessToken = jwtProvider.generateAccessToken(users);
-        String refreshToken = jwtProvider.generateRefreshToken(users);
-
-        return new UserResponseDto(accessToken, refreshToken);
-
+        emailVerificationService.send(user.email());
     }
 
+    @Transactional
     public UserUpdateResponseDto updateUser(Long id, UserUpdataRequestDto dto) {
         Users user = userRepository.findById(id).orElse(null);
         user.setNickname(dto.nickname());
@@ -59,6 +59,7 @@ public class UserService {
         return new UserUpdateResponseDto(dto.nickname());
     }
 
+    @Transactional
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
