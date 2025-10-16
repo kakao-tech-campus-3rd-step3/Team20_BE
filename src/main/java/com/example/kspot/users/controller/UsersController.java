@@ -13,7 +13,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +24,11 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/users")
 public class UsersController {
+
+    @Value("${jwt.access-ttl}")
+    private long accessTtl;
+    @Value("${jwt.refresh-ttl}")
+    private long refreshTtl;
 
     private final UserService userService;
     public UsersController(UserService userService) {
@@ -68,9 +76,28 @@ public class UsersController {
     })
     @PostMapping
     public ResponseEntity<?> createUser(@RequestBody UserRequestDto user) {
-        var data = userService.register(user);
+        var token = userService.register(user);
+
+        ResponseCookie refreshCookie = ResponseCookie.from("Host-refresh_token", token.refreshToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .sameSite("Strict")
+                .maxAge(refreshTtl)
+                .build();
+
+        ResponseCookie accessCookie = ResponseCookie.from("Host-access_token", token.accessToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .sameSite("Strict")
+                .maxAge(accessTtl)
+                .build();
+
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new ApiResponseDto<>(204 , "회원가입 성공" , data));
+                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                .body(new ApiResponseDto<>(204 , "회원가입 성공" , token.accessToken()));
     }
 
     //4. 사용자 이름 수정
@@ -115,8 +142,34 @@ public class UsersController {
     @PostMapping("/login")
     public ResponseEntity<ApiResponseDto<?>> login(@RequestBody UserRequestDto dto) {
 
-        var accessToken = userService.login(dto);
-        return ResponseEntity.ok(new ApiResponseDto<>(200,"로그인 성공" , accessToken));
+        var token = userService.login(dto);
+
+        ResponseCookie refreshCookie = ResponseCookie.from("Host-refresh_token", token.refreshToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .sameSite("Strict")
+                .maxAge(refreshTtl)
+                .build();
+
+        ResponseCookie accessCookie = ResponseCookie.from("Host-access_token", token.accessToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .sameSite("Strict")
+                .maxAge(accessTtl)
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                .body(new ApiResponseDto<>(200, "로그인 성공", token.accessToken()));
+    }
+
+    @PostMapping("/masterToken")
+    public ResponseEntity<ApiResponseDto<?>> getMasterToken() {
+        var masterToken = userService.getMasterToken();
+        return ResponseEntity.ok(new ApiResponseDto<>(204 , "master 토큰 생성 성공" , masterToken));
     }
 
 }

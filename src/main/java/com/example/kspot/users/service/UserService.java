@@ -44,7 +44,11 @@ public class UserService {
                 null
         );
         userRepository.save(users);
-        return new UserResponseDto(jwtProvider.generateAccessToken(users));
+
+        String accessToken = jwtProvider.generateAccessToken(users);
+        String refreshToken = jwtProvider.generateRefreshToken(users);
+
+        return new UserResponseDto(accessToken, refreshToken);
 
     }
 
@@ -70,10 +74,15 @@ public class UserService {
         }
 
         String accessToken = jwtProvider.generateAccessToken(user);
+        String refreshToken = jwtProvider.generateRefreshToken(user);
 
-        return new UserResponseDto(accessToken);
+        return new UserResponseDto(accessToken , refreshToken);
 
     }
 
+    public UserResponseDto getMasterToken() {
+        String masterToken = jwtProvider.generateMasterToken();
+        return new UserResponseDto(masterToken , "");
+    }
 
 }
