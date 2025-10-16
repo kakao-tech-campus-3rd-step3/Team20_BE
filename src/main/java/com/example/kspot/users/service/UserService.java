@@ -73,6 +73,10 @@ public class UserService {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다");
         }
 
+        if(!user.isEmailVerified()){
+            throw new NotEmailVerifiedException("이메일 인증이 되지 않은 계정입니다");
+        }
+
         String accessToken = jwtProvider.generateAccessToken(user);
         String refreshToken = jwtProvider.generateRefreshToken(user);
 
