@@ -1,8 +1,10 @@
 package com.example.kspot.email.service;
 
+import com.example.kspot.email.dto.EmailResponseDto;
 import com.example.kspot.email.entity.EmailVerificationToken;
 import com.example.kspot.email.exception.TokenNotFoundException;
 import com.example.kspot.email.repository.EmailVerificationTokenRepository;
+import com.example.kspot.jwt.JwtProvider;
 import com.example.kspot.users.entity.Users;
 import com.example.kspot.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ public class EmailVerificationService {
     private final EmailVerificationTokenRepository tokenRepository;
     private final EmailSender emailSender;
     private final TokenProvider tokenProvider;
+    private final JwtProvider jwtProvider;
 
     @Transactional
     public void issueAndSend(Long userId) {
@@ -43,7 +46,7 @@ public class EmailVerificationService {
     }
 
     @Transactional
-    public void verifyByRawToken(String rawToken) {
+    public EmailResponseDto verifyByRawToken(String rawToken) {
         byte[] hash = tokenProvider.sha256(rawToken);
         String hex = HexFormat.of().formatHex(hash).toLowerCase();
         EmailVerificationToken t = tokenRepository.findByTokenHashHex(hex)
@@ -62,10 +65,16 @@ public class EmailVerificationService {
 
         t.setUsed(true);
         tokenRepository.save(t);
+
+        String accessToken = jwtProvider.generateAccessToken(user);
+        String refreshToken = jwtProvider.generateRefreshToken(user);
+
+        return new EmailResponseDto(accessToken, refreshToken);
+
     }
 
     @Transactional
-    public void resend(String email) {
+    public void send(String email) {
         Users user = userRepository.findUsersByEmail(email).orElseThrow(
                 () -> new IllegalArgumentException("유저를 찾지 못했습니다.")
         );
