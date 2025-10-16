@@ -78,7 +78,7 @@ public class UsersController {
     public ResponseEntity<?> createUser(@RequestBody UserRequestDto user) {
         var token = userService.register(user);
 
-        ResponseCookie refreshCookie = ResponseCookie.from("Host-refresh_token", token.refreshToken())
+        ResponseCookie refreshCookie = ResponseCookie.from("__Host-refresh_token", token.refreshToken())
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
@@ -86,7 +86,7 @@ public class UsersController {
                 .maxAge(refreshTtl)
                 .build();
 
-        ResponseCookie accessCookie = ResponseCookie.from("Host-access_token", token.accessToken())
+        ResponseCookie accessCookie = ResponseCookie.from("__Host-access_token", token.accessToken())
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
@@ -144,7 +144,7 @@ public class UsersController {
 
         var token = userService.login(dto);
 
-        ResponseCookie refreshCookie = ResponseCookie.from("Host-refresh_token", token.refreshToken())
+        ResponseCookie refreshCookie = ResponseCookie.from("__Host-refresh_token", token.refreshToken())
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
@@ -152,7 +152,7 @@ public class UsersController {
                 .maxAge(refreshTtl)
                 .build();
 
-        ResponseCookie accessCookie = ResponseCookie.from("Host-access_token", token.accessToken())
+        ResponseCookie accessCookie = ResponseCookie.from("__Host-access_token", token.accessToken())
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
