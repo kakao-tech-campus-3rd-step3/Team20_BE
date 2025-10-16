@@ -23,7 +23,7 @@ public class EmailVerificationController {
     @PostMapping("/request")
     public ResponseEntity<?> request(@RequestBody Map<String,String> body) {
         String email = body.getOrDefault("email", "");
-        verificationService.resend(email);
+        verificationService.send(email);
         return ResponseEntity.ok(Map.of("message", "인증 메일을 확인해 주세요(이미 인증된 경우 무시)."));
     }
 }

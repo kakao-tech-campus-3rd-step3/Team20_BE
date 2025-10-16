@@ -65,7 +65,7 @@ public class EmailVerificationService {
     }
 
     @Transactional
-    public void resend(String email) {
+    public void send(String email) {
         Users user = userRepository.findUsersByEmail(email).orElseThrow(
                 () -> new IllegalArgumentException("유저를 찾지 못했습니다.")
         );
