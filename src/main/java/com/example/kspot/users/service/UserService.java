@@ -45,7 +45,6 @@ public class UserService {
                 null,
                 encodedPw,
                 null,
-                null,
                 false,
                 null,
                 null
