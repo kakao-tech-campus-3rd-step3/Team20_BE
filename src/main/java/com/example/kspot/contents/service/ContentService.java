@@ -52,21 +52,15 @@ public class ContentService {
   }
 
   //인기순 조회 (전체 or 카테고리별)
-  public Page<ContentItemDto> getPopularContents(String category, int page, int size) {
-    Pageable pageable = PageRequest.of(page, size, Sort.by("Popularity").descending());
+
+  public Page<ContentItemDto> getPopularContents(String category, int page, int size){
+    Pageable pageable = PageRequest.of(page, size, Sort.by("popularity").descending());
 
     Page<Content> contents;
     if (category == null || category.isBlank()) {
       contents = contentRepository.findAll(pageable);
     } else {
       contents = contentRepository.findByCategory(category, pageable);
-      if (contents.isEmpty()) {
-        throw new IllegalArgumentException("해당 카테고리의 콘텐츠가 없습니다.");
-      }
-    }
-
-    if (contents.isEmpty()) {
-      throw new IllegalArgumentException("조회 가능한 콘텐츠가 없습니다.");
     }
 
     return contents.map(c -> new ContentItemDto(
