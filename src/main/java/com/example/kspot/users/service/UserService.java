@@ -84,10 +84,4 @@ public class UserService {
         return new UserResponseDto(accessToken , refreshToken);
 
     }
-
-    public UserResponseDto getMasterToken() {
-        String masterToken = jwtProvider.generateMasterToken();
-        return new UserResponseDto(masterToken , "");
-    }
-
 }

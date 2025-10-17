@@ -148,10 +148,4 @@ public class UsersController {
                 .body(new ApiResponseDto<>(200, "로그인 성공", token.accessToken()));
     }
 
-    @PostMapping("/masterToken")
-    public ResponseEntity<ApiResponseDto<?>> getMasterToken() {
-        var masterToken = userService.getMasterToken();
-        return ResponseEntity.ok(new ApiResponseDto<>(204 , "master 토큰 생성 성공" , masterToken));
-    }
-
 }
