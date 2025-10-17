@@ -50,6 +50,7 @@ dependencies {
     implementation 'org.apache.commons:commons-lang3:3.18.0'
 
     testImplementation 'com.h2database:h2'
+    implementation 'com.opencsv:opencsv:5.9'
 
 }
 
