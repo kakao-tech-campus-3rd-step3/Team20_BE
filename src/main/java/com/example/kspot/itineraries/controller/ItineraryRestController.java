@@ -44,12 +44,11 @@ public class ItineraryRestController {
       summary = "여행 계획 상세 조회",
       description = "여행 일정 ID를 이용해 특정 여행 계획의 상세 정보를 조회합니다."
   )
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "여행 계획 상세 조회 성공",
-          content = @Content(schema = @Schema(implementation = ItineraryResponseDto.class))),
-      @ApiResponse(responseCode = "401", description = "인증 실패 - 유효하지 않은 또는 누락된 토큰"),
-      @ApiResponse(responseCode = "404", description = "해당 여행 계획을 찾을 수 없음"),
-      @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+  @ApiResponses({
+          @ApiResponse(responseCode = "200", ref = "#/components/responses/Ok"),
+          @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
+          @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound"),
+          @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
   })
   @GetMapping("/{id}")
   public ResponseEntity<ApiResponseDto<ItineraryResponseDto>> getItinerary(
@@ -66,8 +65,9 @@ public class ItineraryRestController {
       description = "특정 사용자의 ID를 사용해, 해당 사용자가 등록한 모든 일정 조회"
   )
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "사용자 여행 일정 목록 조회 성공"),
-      @ApiResponse(responseCode = "404", description = "해당 사용자 ID가 존재하지 않는 경우")
+          @ApiResponse(responseCode = "200", ref = "#/components/responses/Ok"),
+          @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound"),
+          @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
   })
   @GetMapping("/user/{userId}")
   public ResponseEntity<ApiResponseDto<List<ItineraryResponseDto>>> getItinerariesByUserId(
@@ -87,16 +87,16 @@ public class ItineraryRestController {
   @ApiResponses(value = {
       @ApiResponse(responseCode = "201", description = "여행 계획 생성 성공",
           content = @Content(schema = @Schema(implementation = ItineraryResponseDto.class))),
-      @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
-      @ApiResponse(responseCode = "401", description = "인증 실패 - 유효하지 않은 또는 누락된 토큰"),
-      @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+          @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
+          @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
+          @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
   })
   @PostMapping
   public ResponseEntity<ApiResponseDto<ItineraryResponseDto>> createItinerary(
       @RequestBody CreateItineraryRequest request,
       HttpServletRequest httpRequest
   ) {
-    Long userId = extractUserIdFromJwt(httpRequest);
+    Long userId = jwtProvider.extractUserIdFromRequest(httpRequest);
 
     ItineraryResponseDto response = itineraryService.createItinerary(request, userId);
     return ResponseEntity.status(HttpStatus.CREATED).body(
@@ -104,13 +104,21 @@ public class ItineraryRestController {
     );
   }
 
+  @Operation(summary = "여행 계획 수정", description = "기존 여행 계획의 정보를 수정합니다.")
+  @ApiResponses({
+          @ApiResponse(responseCode = "200", ref = "#/components/responses/Ok"),
+          @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
+          @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
+          @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound"),
+          @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
+  })
   @PutMapping("/{itineraryId}")
   public ResponseEntity<ApiResponseDto<ItineraryResponseDto>> updateItinerary(
       @PathVariable Long itineraryId,
       @RequestBody CreateItineraryRequest request,
       HttpServletRequest httpRequest
   ) {
-    Long userId = extractUserIdFromJwt(httpRequest);
+    Long userId = jwtProvider.extractUserIdFromRequest(httpRequest);
     if (userId == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
           .body(new ApiResponseDto<>(401, "JWT 토큰이 유효하지 않습니다", null));
@@ -121,31 +129,24 @@ public class ItineraryRestController {
         .body(new ApiResponseDto<>(200, "여행계획이 업데이트 되었습니다", responseDto));
   }
 
+  @Operation(summary = "여행 계획 삭제", description = "여행 계획 ID를 이용해 해당 일정을 삭제합니다.")
+  @ApiResponses({
+          @ApiResponse(responseCode = "200", ref = "#/components/responses/Ok"),
+          @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
+          @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound"),
+          @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
+  })
   @DeleteMapping("/{itineraryId}")
   public ResponseEntity<ApiResponseDto<ItineraryResponseDto>> deleteItinerary(
       @PathVariable Long itineraryId,
       HttpServletRequest httpRequest
   ) {
-    Long userId = extractUserIdFromJwt(httpRequest);
+    Long userId = jwtProvider.extractUserIdFromRequest(httpRequest);
     if (userId == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
           .body(new ApiResponseDto<>(401, "JWT 토큰이 유효하지 않습니다", null));
     }
     itineraryService.deleteItinerary(itineraryId, userId);
     return ResponseEntity.ok(new ApiResponseDto<>(200, "여행 계획이 정상적으로 삭제되었습니다", null));
-  }
-
-  private Long extractUserIdFromJwt(HttpServletRequest request) {
-    String authHeader = request.getHeader("Authorization");
-    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-      return null;
-    }
-
-    String token = authHeader.substring(7);
-    try {
-      return jwtProvider.validateToken(token);
-    } catch (Exception e) {
-      return null;
-    }
   }
 }
