@@ -69,6 +69,9 @@ public class EmailVerificationService {
         String accessToken = jwtProvider.generateAccessToken(user);
         String refreshToken = jwtProvider.generateRefreshToken(user);
 
+        user.setRefreshToken(refreshToken);
+        userRepository.save(user);
+
         return new EmailResponseDto(accessToken, refreshToken);
 
     }
