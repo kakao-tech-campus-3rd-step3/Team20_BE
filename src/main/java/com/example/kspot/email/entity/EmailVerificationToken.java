@@ -6,6 +6,8 @@ import com.example.kspot.users.entity.Users;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 
@@ -20,6 +22,7 @@ public class EmailVerificationToken {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Users user;
 
     @Column(name = "token_hash_hex", nullable = false, length = 32)
