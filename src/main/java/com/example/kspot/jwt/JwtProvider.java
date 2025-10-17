@@ -55,5 +55,4 @@ public class JwtProvider {
             throw new RuntimeException("토큰 유효성 검사 실패");
         }
     }
-
 }

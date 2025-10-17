@@ -10,7 +10,8 @@ public record UserInfoResponseDto(
         String nickname,
         String provider,
         LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+        boolean emailVerified
 ) {
     public static UserInfoResponseDto fromEntity(Users user) {
         return new UserInfoResponseDto(
@@ -19,7 +20,8 @@ public record UserInfoResponseDto(
                 user.getNickname(),
                 user.getProvider(),
                 user.getCreatedAt(),
-                user.getUpdatedAt()
+                user.getUpdatedAt(),
+                user.isEmailVerified()
         );
     }
 }

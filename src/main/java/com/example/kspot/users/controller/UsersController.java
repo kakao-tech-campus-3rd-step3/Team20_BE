@@ -76,28 +76,10 @@ public class UsersController {
     })
     @PostMapping
     public ResponseEntity<?> createUser(@RequestBody UserRequestDto user) {
-        var token = userService.register(user);
 
-        ResponseCookie refreshCookie = ResponseCookie.from("Host-refresh_token", token.refreshToken())
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .sameSite("Strict")
-                .maxAge(refreshTtl)
-                .build();
-
-        ResponseCookie accessCookie = ResponseCookie.from("Host-access_token", token.accessToken())
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .sameSite("Strict")
-                .maxAge(accessTtl)
-                .build();
-
+        userService.register(user);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
-                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
-                .body(new ApiResponseDto<>(204 , "회원가입 성공" , token.accessToken()));
+                .body(new ApiResponseDto<>(201 , "이메일을 확인해 주세요" , null));
     }
 
     //4. 사용자 이름 수정
@@ -144,7 +126,7 @@ public class UsersController {
 
         var token = userService.login(dto);
 
-        ResponseCookie refreshCookie = ResponseCookie.from("Host-refresh_token", token.refreshToken())
+        ResponseCookie refreshToken = ResponseCookie.from("__Host-refresh_token", token.refreshToken())
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
@@ -152,7 +134,7 @@ public class UsersController {
                 .maxAge(refreshTtl)
                 .build();
 
-        ResponseCookie accessCookie = ResponseCookie.from("Host-access_token", token.accessToken())
+        ResponseCookie accessToken = ResponseCookie.from("__Host-access_token", token.accessToken())
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
@@ -161,8 +143,8 @@ public class UsersController {
                 .build();
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
-                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, accessToken.toString())
+                .header(HttpHeaders.SET_COOKIE, refreshToken.toString())
                 .body(new ApiResponseDto<>(200, "로그인 성공", token.accessToken()));
     }
 
