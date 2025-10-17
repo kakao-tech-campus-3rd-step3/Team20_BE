@@ -96,7 +96,7 @@ public class ItineraryRestController {
       @RequestBody CreateItineraryRequest request,
       HttpServletRequest httpRequest
   ) {
-    Long userId = extractUserIdFromJwt(httpRequest);
+    Long userId = jwtProvider.extractUserIdFromRequest(httpRequest);
 
     ItineraryResponseDto response = itineraryService.createItinerary(request, userId);
     return ResponseEntity.status(HttpStatus.CREATED).body(
@@ -118,7 +118,7 @@ public class ItineraryRestController {
       @RequestBody CreateItineraryRequest request,
       HttpServletRequest httpRequest
   ) {
-    Long userId = extractUserIdFromJwt(httpRequest);
+    Long userId = jwtProvider.extractUserIdFromRequest(httpRequest);
     if (userId == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
           .body(new ApiResponseDto<>(401, "JWT 토큰이 유효하지 않습니다", null));
@@ -141,26 +141,12 @@ public class ItineraryRestController {
       @PathVariable Long itineraryId,
       HttpServletRequest httpRequest
   ) {
-    Long userId = extractUserIdFromJwt(httpRequest);
+    Long userId = jwtProvider.extractUserIdFromRequest(httpRequest);
     if (userId == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
           .body(new ApiResponseDto<>(401, "JWT 토큰이 유효하지 않습니다", null));
     }
     itineraryService.deleteItinerary(itineraryId, userId);
     return ResponseEntity.ok(new ApiResponseDto<>(200, "여행 계획이 정상적으로 삭제되었습니다", null));
-  }
-
-  private Long extractUserIdFromJwt(HttpServletRequest request) {
-    String authHeader = request.getHeader("Authorization");
-    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-      return null;
-    }
-
-    String token = authHeader.substring(7);
-    try {
-      return jwtProvider.validateToken(token);
-    } catch (Exception e) {
-      return null;
-    }
   }
 }
