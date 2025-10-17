@@ -23,6 +23,11 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class EmailVerificationController {
     private final EmailVerificationService verificationService;
+    
+    @Value("${jwt.access-ttl}")
+    private long accessTtl;
+    @Value("${jwt.refresh-ttl}")
+    private long refreshTtl;
 
     @Operation(summary = "이메일 인증 확인", description = "토큰을 통해 이메일 인증을 완료합니다.")
     @ApiResponses({
@@ -32,11 +37,6 @@ public class EmailVerificationController {
             @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound"),
             @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
     })
-    @Value("${jwt.access-ttl}")
-    private long accessTtl;
-    @Value("${jwt.refresh-ttl}")
-    private long refreshTtl;
-
     @GetMapping("/verify")
     public ResponseEntity<?> verify(@RequestParam("token") String token) {
         EmailResponseDto createdToken = verificationService.verifyByRawToken(token);

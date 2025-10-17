@@ -147,16 +147,4 @@ public class UsersController {
                 .header(HttpHeaders.SET_COOKIE, refreshToken.toString())
                 .body(new ApiResponseDto<>(200, "로그인 성공", token.accessToken()));
     }
-
-    @Operation(summary = "마스터 토큰 발급", description = "관리자용 마스터 토큰을 발급받습니다.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "master 토큰 생성 완료"),
-            @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
-    })
-    @PostMapping("/masterToken")
-    public ResponseEntity<ApiResponseDto<?>> getMasterToken() {
-        var masterToken = userService.getMasterToken();
-        return ResponseEntity.ok(new ApiResponseDto<>(204 , "master 토큰 생성 성공" , masterToken));
-    }
-
 }
