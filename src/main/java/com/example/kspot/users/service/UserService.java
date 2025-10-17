@@ -1,5 +1,6 @@
 package com.example.kspot.users.service;
 
+import com.example.kspot.config.SecurityConfig;
 import com.example.kspot.email.service.EmailVerificationService;
 import com.example.kspot.jwt.JwtProvider;
 import com.example.kspot.users.dto.*;
@@ -7,7 +8,7 @@ import com.example.kspot.users.entity.Users;
 import com.example.kspot.users.exception.NotEmailVerifiedException;
 import com.example.kspot.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final JwtProvider jwtProvider;
     private final EmailVerificationService emailVerificationService;
+    private final SecurityConfig securityConfig;
 
     public List<UserInfoResponseDto> getUsers(){
         return userRepository.findAll().stream().map(UserInfoResponseDto::fromEntity).toList();
@@ -34,12 +36,14 @@ public class UserService {
     @Transactional
     public void register(UserRequestDto user) {
 
+        String encodedPw = securityConfig.encodePassword(user.password());
+
         Users users = new Users(
                 null,
                 user.email(),
                 user.nickname(),
                 null,
-                user.password(),
+                encodedPw,
                 null,
                 null,
                 false,
@@ -67,11 +71,11 @@ public class UserService {
     public UserResponseDto login(UserRequestDto userRequestDto){
 
         Users user = userRepository.findUsersByEmail(userRequestDto.email()).orElseThrow(
-                () -> new IllegalArgumentException  ("이메일이 일치하지 않습니다")
+                () -> new BadCredentialsException("이메일이 일치하지 않습니다")
         );
 
-        if(!user.getPassword().equals(userRequestDto.password())){
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다");
+        if(!securityConfig.matches(userRequestDto.password(), user.getPassword())){
+            throw new BadCredentialsException("비밀번호가 일치하지 않습니다");
         }
 
         if(!user.isEmailVerified()){
@@ -82,7 +86,6 @@ public class UserService {
         String refreshToken = jwtProvider.generateRefreshToken(user);
 
         return new UserResponseDto(accessToken , refreshToken);
-
     }
 
     public UserResponseDto getMasterToken() {
