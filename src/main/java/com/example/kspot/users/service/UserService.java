@@ -37,6 +37,12 @@ public class UserService {
     public void register(UserRequestDto user) {
 
         String encodedPw = securityConfig.encodePassword(user.password());
+        
+        //이미 db에 이메일이 있을 경우 해당 이메일로 인증 전송
+        if(userRepository.findUsersByEmail(user.email()).isPresent()){
+            emailVerificationService.send(user.email());
+            return;
+        }
 
         Users users = new Users(
                 null,
