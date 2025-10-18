@@ -145,7 +145,7 @@ public class UsersController {
                 .body(new ApiResponseDto<>(200, "로그인 성공", token.accessToken()));
     }
 
-    @PutMapping("/reset-password")
+    @PatchMapping("/reset-password")
     public ResponseEntity<ApiResponseDto<?>> resetPassword(@RequestBody UserRequestDto dto) {
         userService.resetPassword(dto);
         return ResponseEntity.ok(new ApiResponseDto<>(200 , "비밀번호 변경에 성공했습니다!" , null));
