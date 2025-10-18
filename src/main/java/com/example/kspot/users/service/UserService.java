@@ -37,14 +37,16 @@ public class UserService {
     @Transactional
     public void register(UserRequestDto user) {
 
+        //이미 db에 이메일이 있을 경우 해당 이메일로 인증 전송
+        userRepository.findUsersByEmail(user.email())
+                .ifPresent(existing -> {
+                    existing.setPassword(securityConfig.encodePassword(user.password()));
+                    userRepository.save(existing);
+                    emailVerificationService.send(existing.getEmail());
+                });
+
         if(userRepository.findUsersByNickname(user.nickname()).isPresent()){
             throw new DuplicateNicknameException();
-        }
-
-        //이미 db에 이메일이 있을 경우 해당 이메일로 인증 전송
-        if(userRepository.findUsersByEmail(user.email()).isPresent()){
-            emailVerificationService.send(user.email());
-            return;
         }
 
         String encodedPw = securityConfig.encodePassword(user.password());
