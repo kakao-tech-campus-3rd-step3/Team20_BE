@@ -39,12 +39,14 @@ public class UserService {
     public void register(UserRequestDto user) {
 
         //이미 db에 이메일이 있을 경우 해당 이메일로 인증 전송
-        userRepository.findUsersByEmail(user.email())
-                .ifPresent(existing -> {
-                    existing.setPassword(securityConfig.encodePassword(user.password()));
-                    userRepository.save(existing);
-                    emailVerificationService.send(existing.getEmail(),0);
-                });
+        Optional<Users> opt = userRepository.findUsersByEmail(user.email());
+        if (opt.isPresent()) {
+            Users existing = opt.get();
+            existing.setPassword(securityConfig.encodePassword(user.password()));
+            userRepository.save(existing);
+            emailVerificationService.send(existing.getEmail(),0);
+            return;
+        }
 
         if(userRepository.findUsersByNickname(user.nickname()).isPresent()){
             throw new DuplicateNicknameException();
