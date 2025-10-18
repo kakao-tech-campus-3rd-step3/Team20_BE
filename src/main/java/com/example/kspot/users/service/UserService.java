@@ -44,7 +44,7 @@ public class UserService {
             Users existing = opt.get();
             existing.setPassword(securityConfig.encodePassword(user.password()));
             userRepository.save(existing);
-            emailVerificationService.send(existing.getEmail());
+            emailVerificationService.send(existing.getEmail(),0);
             return;
         }
 
