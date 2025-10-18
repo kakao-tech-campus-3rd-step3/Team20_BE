@@ -37,8 +37,6 @@ public class Users {
 
     @Column(nullable = false)
     private String password;
-
-    private String accessToken;
     private String refreshToken;
 
     @Column(nullable = false)

@@ -1,7 +1,6 @@
 package com.example.kspot.external.tmdb.controller;
 
 import com.example.kspot.external.tmdb.service.TmdbContentService;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 

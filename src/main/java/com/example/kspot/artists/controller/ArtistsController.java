@@ -24,9 +24,9 @@ public class ArtistsController {
 
     @Operation(summary = "아티스트 목록 조회", description = "전체 아티스트 목록을 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",description = "아티스트 전체 목록 조회 성공"),
-            @ApiResponse(responseCode = "401",description = "인증 실패 - 유효하지 않은 또는 누락된 토큰"),
-            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            @ApiResponse(responseCode = "200", ref = "#/components/responses/Ok"),
+            @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
+            @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
     })
     @GetMapping()
     public ResponseEntity<Map<String,Object>> getArtists() {
@@ -44,9 +44,10 @@ public class ArtistsController {
     @Operation(summary = "특정 아티스트 조회",
             description = "아티스트 ID를 이용해 특정 아티스트의 상세 정보를 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",description = "아티스트 조회 성공"),
-            @ApiResponse(responseCode = "401",description = "인증 실패 - 유효하지 않은 또는 누락된 토큰"),
-            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            @ApiResponse(responseCode = "200", ref = "#/components/responses/Ok"),
+            @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
+            @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound"),
+            @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
     })
     @GetMapping("/{id}")
     public ResponseEntity<Map<String, Object>> getArtistById(@Parameter(description = "조회할 아티스트의 고유ID", example = "1")

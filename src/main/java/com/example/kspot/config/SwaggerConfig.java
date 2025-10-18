@@ -1,5 +1,9 @@
 package com.example.kspot.config;
 
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -26,6 +30,39 @@ public class SwaggerConfig {
         Server server = new Server()
             .url("${kspot.server.url}")
             .description("K-SPOT HTTPS 서버");
+
+        //공통 응답 스키마
+        Components components = new Components()
+                .addResponses("Ok",
+                        new ApiResponse()
+                                .description("정상 응답")
+                                .content(new Content().addMediaType("application/json",
+                                        new MediaType().schema(new Schema<>().$ref("#/components/schemas/ApiResponseDto")))))
+                .addResponses("BadRequest",
+                        new ApiResponse()
+                                .description("잘못된 요청 (파라미터나 입력 값 오류)")
+                                .content(new Content().addMediaType("application/json",
+                                        new MediaType().schema(new Schema<>().$ref("#/components/schemas/ApiResponseDto")))))
+                .addResponses("Unauthorized",
+                        new ApiResponse()
+                                .description("인증 실패 또는 토큰 만료")
+                                .content(new Content().addMediaType("application/json",
+                                        new MediaType().schema(new Schema<>().$ref("#/components/schemas/ApiResponseDto")))))
+                .addResponses("NotFound",
+                        new ApiResponse()
+                                .description("리소스를 찾을 수 없음")
+                                .content(new Content().addMediaType("application/json",
+                                        new MediaType().schema(new Schema<>().$ref("#/components/schemas/ApiResponseDto")))))
+                .addResponses("Conflict",
+                        new ApiResponse()
+                                .description("이미 사용된 리소스 (중복 요청)")
+                                .content(new Content().addMediaType("application/json",
+                                        new MediaType().schema(new Schema<>().$ref("#/components/schemas/ApiResponseDto")))))
+                .addResponses("InternalServerError",
+                        new ApiResponse()
+                                .description("서버 내부 오류")
+                                .content(new Content().addMediaType("application/json",
+                                        new MediaType().schema(new Schema<>().$ref("#/components/schemas/ApiResponseDto")))));
 
         return new OpenAPI()
                 .addServersItem(server)

@@ -40,8 +40,6 @@ public class TmdbScheduler {
             return;
         }
         try {
-            String result = tmdbService.insert();
-            log.info("TMDB {}", result);
         } catch (Exception e) {
             log.error("TMDB 스케줄러 실행 실패", e);
         } finally {
