@@ -5,6 +5,7 @@ import com.example.kspot.email.service.EmailVerificationService;
 import com.example.kspot.jwt.JwtProvider;
 import com.example.kspot.users.dto.*;
 import com.example.kspot.users.entity.Users;
+import com.example.kspot.users.exception.DuplicateNicknameException;
 import com.example.kspot.users.exception.NotEmailVerifiedException;
 import com.example.kspot.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,13 +37,19 @@ public class UserService {
     @Transactional
     public void register(UserRequestDto user) {
 
-        String encodedPw = securityConfig.encodePassword(user.password());
-        
         //이미 db에 이메일이 있을 경우 해당 이메일로 인증 전송
-        if(userRepository.findUsersByEmail(user.email()).isPresent()){
-            emailVerificationService.send(user.email());
-            return;
+        userRepository.findUsersByEmail(user.email())
+                .ifPresent(existing -> {
+                    existing.setPassword(securityConfig.encodePassword(user.password()));
+                    userRepository.save(existing);
+                    emailVerificationService.send(existing.getEmail());
+                });
+
+        if(userRepository.findUsersByNickname(user.nickname()).isPresent()){
+            throw new DuplicateNicknameException();
         }
+
+        String encodedPw = securityConfig.encodePassword(user.password());
 
         Users users = new Users(
                 null,

@@ -6,6 +6,7 @@ import com.example.kspot.email.exception.TokenAlreadyUsedException;
 import com.example.kspot.email.exception.TokenNotFoundException;
 import com.example.kspot.itineraries.exception.ItineraryNotFoundException;
 import com.example.kspot.itineraries.exception.LocationNotFoundException;
+import com.example.kspot.users.exception.DuplicateNicknameException;
 import com.example.kspot.users.exception.NotEmailVerifiedException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -58,6 +59,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotEmailVerifiedException.class)
     public ResponseEntity<String> handleNotEmailVerified(NotEmailVerifiedException e, HttpServletRequest req) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage()); //403
+    }
+
+    @ExceptionHandler(DuplicateNicknameException.class)
+    public ResponseEntity<String> handleDuplicateNickname(DuplicateNicknameException e, HttpServletRequest req) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
 
     //런타임 예외 처리
