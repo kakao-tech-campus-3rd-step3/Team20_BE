@@ -4,7 +4,7 @@ import com.example.kspot.contents.dto.ApiResponseDto;
 import com.example.kspot.itineraries.dto.CreateItineraryRequest;
 import com.example.kspot.itineraries.dto.ItineraryResponseDto;
 import com.example.kspot.itineraries.service.ItineraryService;
-import com.example.kspot.jwt.JwtProvider;
+import com.example.kspot.auth.jwt.JwtProvider;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;

@@ -2,7 +2,7 @@ package com.example.kspot.users.service;
 
 import com.example.kspot.config.SecurityConfig;
 import com.example.kspot.email.service.EmailVerificationService;
-import com.example.kspot.jwt.JwtProvider;
+import com.example.kspot.auth.jwt.JwtProvider;
 import com.example.kspot.users.dto.*;
 import com.example.kspot.users.entity.Users;
 import com.example.kspot.users.exception.DuplicateNicknameException;
@@ -13,7 +13,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.SQLOutput;
 import java.util.List;
 import java.util.Optional;
 

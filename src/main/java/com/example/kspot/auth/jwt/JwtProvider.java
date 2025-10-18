@@ -1,4 +1,4 @@
-package com.example.kspot.jwt;
+package com.example.kspot.auth.jwt;
 
 import com.example.kspot.users.entity.Users;
 import io.jsonwebtoken.Claims;

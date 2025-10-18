@@ -77,10 +77,6 @@ public class EmailVerificationController {
         return ResponseEntity.ok(Map.of("message", "인증 메일을 확인해 주세요(이미 인증된 경우 무시)."));
     }
 
-    @PostMapping("/reset-password/request")
-    public ResponseEntity<ApiResponseDto<?>> confirmResetPassword(@RequestBody ResetPasswordDto dto) {
-        verificationService.send(dto.email(),1);
-        return ResponseEntity.ok(new ApiResponseDto<>(200, "비밀번호 변경을 위해 인증 메일을 확인해 주세요(이미 인증된 경우 무시)." , null ));
-    }
+
 
 }

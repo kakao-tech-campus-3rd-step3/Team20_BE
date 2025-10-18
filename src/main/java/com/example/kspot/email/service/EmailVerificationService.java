@@ -4,7 +4,7 @@ import com.example.kspot.email.dto.EmailResponseDto;
 import com.example.kspot.email.entity.EmailVerificationToken;
 import com.example.kspot.email.exception.TokenNotFoundException;
 import com.example.kspot.email.repository.EmailVerificationTokenRepository;
-import com.example.kspot.jwt.JwtProvider;
+import com.example.kspot.auth.jwt.JwtProvider;
 import com.example.kspot.users.entity.Users;
 import com.example.kspot.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

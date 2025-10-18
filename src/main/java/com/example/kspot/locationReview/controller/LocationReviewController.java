@@ -2,7 +2,7 @@ package com.example.kspot.locationReview.controller;
 
 import com.example.kspot.contents.dto.ApiResponseDto;
 import com.example.kspot.contents.dto.PaginationDto;
-import com.example.kspot.jwt.JwtProvider;
+import com.example.kspot.auth.jwt.JwtProvider;
 import com.example.kspot.locationReview.dto.CreateLocationReviewRequest;
 import com.example.kspot.locationReview.dto.LocationReviewDto;
 import com.example.kspot.locationReview.dto.LocationReviewListDto;
