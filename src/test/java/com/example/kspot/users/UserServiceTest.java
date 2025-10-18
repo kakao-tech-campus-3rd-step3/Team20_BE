@@ -52,7 +52,6 @@ class UserServiceTest {
                 "LOCAL",
                 "{bcrypt}encoded",
                 null,
-                null,
                 false,
                 null,
                 null
@@ -81,7 +80,7 @@ class UserServiceTest {
         assertThat(toSave.isEmailVerified()).isFalse();
 
         // 인증 메일 발송 호출 확인
-        verify(emailVerificationService, times(1)).send("yuuu5683@naver.com");
+        verify(emailVerificationService, times(1)).send("yuuu5683@naver.com",0);
     }
 
     @Nested

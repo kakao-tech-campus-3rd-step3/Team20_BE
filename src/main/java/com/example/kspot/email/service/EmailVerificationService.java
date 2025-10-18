@@ -25,7 +25,7 @@ public class EmailVerificationService {
     private final JwtProvider jwtProvider;
 
     @Transactional
-    public void issueAndSend(Long userId) {
+    public void issueAndSend(Long userId , int caseCode) {
         Users user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다"));
         if (user.isEmailVerified()) return;
@@ -42,7 +42,12 @@ public class EmailVerificationService {
         token.setExpiresAt(LocalDateTime.now().plusMinutes(15));
         tokenRepository.save(token);
 
-        emailSender.sendVerificationMail(user.getEmail(), raw);
+        switch (caseCode) {
+            case 1 -> emailSender.sendVerificationMail(user.getEmail(), raw);
+            case 2 -> emailSender.sendResetPasswordMail(user.getEmail(), raw);
+            default -> {}
+        }
+
     }
 
     @Transactional
@@ -77,12 +82,12 @@ public class EmailVerificationService {
     }
 
     @Transactional
-    public void send(String email) {
+    public void send(String email , int caseCode) {
         Users user = userRepository.findUsersByEmail(email).orElseThrow(
                 () -> new IllegalArgumentException("유저를 찾지 못했습니다.")
         );
         if (user == null || user.isEmailVerified()) return;
-        issueAndSend(user.getUserId());
+        issueAndSend(user.getUserId() , caseCode);
     }
 }
 

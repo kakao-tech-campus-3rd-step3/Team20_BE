@@ -13,6 +13,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.SQLOutput;
 import java.util.List;
 import java.util.Optional;
 
@@ -67,7 +68,7 @@ public class UserService {
         );
         userRepository.save(users);
 
-        emailVerificationService.send(user.email());
+        emailVerificationService.send(user.email(),0);
     }
 
     @Transactional
@@ -101,6 +102,22 @@ public class UserService {
         String refreshToken = jwtProvider.generateRefreshToken(user);
 
         return new UserResponseDto(accessToken , refreshToken);
+    }
+
+    @Transactional
+    public void resetPassword(UserRequestDto dto) {
+
+        Optional<Users> user = userRepository.findUsersByEmail(dto.email());
+
+        if(!user.isPresent()){
+            throw new BadCredentialsException("이메일이 존재하지 않습니다");
+        }
+
+        String encodedPw = securityConfig.encodePassword(dto.password());
+        user.get().setPassword(encodedPw);
+        user.get().setEmailVerified(true);
+        userRepository.save(user.get());
+
     }
 
 }
