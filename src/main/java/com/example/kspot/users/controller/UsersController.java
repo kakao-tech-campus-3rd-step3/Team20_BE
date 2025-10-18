@@ -1,10 +1,7 @@
 package com.example.kspot.users.controller;
 
 import com.example.kspot.contents.dto.ApiResponseDto;
-import com.example.kspot.users.dto.UserInfoResponseDto;
-import com.example.kspot.users.dto.UserRequestDto;
-import com.example.kspot.users.dto.UserUpdataRequestDto;
-import com.example.kspot.users.dto.UserUpdateResponseDto;
+import com.example.kspot.users.dto.*;
 import com.example.kspot.users.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -146,6 +143,12 @@ public class UsersController {
                 .header(HttpHeaders.SET_COOKIE, accessToken.toString())
                 .header(HttpHeaders.SET_COOKIE, refreshToken.toString())
                 .body(new ApiResponseDto<>(200, "로그인 성공", token.accessToken()));
+    }
+
+    @PutMapping("/reset-password")
+    public ResponseEntity<ApiResponseDto<?>> resetPassword(@RequestBody UserRequestDto dto) {
+        userService.resetPassword(dto);
+        return ResponseEntity.ok(new ApiResponseDto<>(200 , "비밀번호 변경에 성공했습니다!" , null));
     }
 
 }
