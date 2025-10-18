@@ -35,4 +35,27 @@ public class EmailSender {
         msg.setText(body);
         mailSender.send(msg);
     }
+
+    public void sendResetPasswordMail(String toEmail, String rawToken) {
+
+        String link = frontendOrigin + "/reset-password?token=" + rawToken;
+
+        String subject = "[K-SPOT] 비밀번호 재설정 링크";
+
+        String body = """
+                안녕하세요,
+                아래 링크를 눌러 비밀번호 재설정을 완료해 주세요.
+                %s
+
+                만약 본인이 요청하지 않았다면 이 메일을 무시하셔도 됩니다.
+                """.formatted(link);
+
+        var msg = new SimpleMailMessage();
+        msg.setFrom(mailUsername);
+        msg.setTo(toEmail);
+        msg.setSubject(subject);
+        msg.setText(body);
+
+        mailSender.send(msg);
+    }
 }
