@@ -28,7 +28,6 @@ public class EmailVerificationService {
     public void issueAndSend(Long userId , int caseCode) {
         Users user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다"));
-        if (user.isEmailVerified()) return;
 
         tokenRepository.invalidateAllActiveByUserId(userId);
 
@@ -86,7 +85,7 @@ public class EmailVerificationService {
         Users user = userRepository.findUsersByEmail(email).orElseThrow(
                 () -> new IllegalArgumentException("유저를 찾지 못했습니다.")
         );
-        if (user == null || user.isEmailVerified()) return;
+        if (user == null) return;
         issueAndSend(user.getUserId() , caseCode);
     }
 }
