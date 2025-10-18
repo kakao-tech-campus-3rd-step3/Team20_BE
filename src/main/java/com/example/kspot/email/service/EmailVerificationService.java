@@ -43,8 +43,8 @@ public class EmailVerificationService {
         tokenRepository.save(token);
 
         switch (caseCode) {
-            case 1 -> emailSender.sendVerificationMail(user.getEmail(), raw);
-            case 2 -> emailSender.sendResetPasswordMail(user.getEmail(), raw);
+            case 0 -> emailSender.sendVerificationMail(user.getEmail(), raw);
+            case 1 -> emailSender.sendResetPasswordMail(user.getEmail(), raw);
             default -> {}
         }
 
