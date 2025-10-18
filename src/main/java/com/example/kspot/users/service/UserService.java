@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -38,12 +39,14 @@ public class UserService {
     public void register(UserRequestDto user) {
 
         //이미 db에 이메일이 있을 경우 해당 이메일로 인증 전송
-        userRepository.findUsersByEmail(user.email())
-                .ifPresent(existing -> {
-                    existing.setPassword(securityConfig.encodePassword(user.password()));
-                    userRepository.save(existing);
-                    emailVerificationService.send(existing.getEmail());
-                });
+        Optional<Users> opt = userRepository.findUsersByEmail(user.email());
+        if (opt.isPresent()) {
+            Users existing = opt.get();
+            existing.setPassword(securityConfig.encodePassword(user.password()));
+            userRepository.save(existing);
+            emailVerificationService.send(existing.getEmail());
+            return;
+        }
 
         if(userRepository.findUsersByNickname(user.nickname()).isPresent()){
             throw new DuplicateNicknameException();
