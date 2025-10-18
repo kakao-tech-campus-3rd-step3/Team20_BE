@@ -1,7 +1,9 @@
 package com.example.kspot.users.controller;
 
+import com.example.kspot.auth.jwt.JwtProvider;
 import com.example.kspot.contents.dto.ApiResponseDto;
 import com.example.kspot.users.dto.*;
+import com.example.kspot.users.service.UserMypageService;
 import com.example.kspot.users.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -10,6 +12,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -19,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Tag(name="Users", description = "사용자 관련 API(회원가입, 로그인, 회원관리)")
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/users")
 public class UsersController {
 
@@ -27,10 +32,9 @@ public class UsersController {
     @Value("${jwt.refresh-ttl}")
     private long refreshTtl;
 
+    private final UserMypageService userMypageService;
     private final UserService userService;
-    public UsersController(UserService userService) {
-        this.userService = userService;
-    }
+    private final JwtProvider jwtProvider;
 
     //1. 전체 사용자 조회
     @Operation(summary = "전체 사용자 조회", description = "등록된 모든 사용자의 정보를 조회합니다.")
@@ -143,6 +147,20 @@ public class UsersController {
                 .header(HttpHeaders.SET_COOKIE, accessToken.toString())
                 .header(HttpHeaders.SET_COOKIE, refreshToken.toString())
                 .body(new ApiResponseDto<>(200, "로그인 성공", token.accessToken()));
+    }
+
+    @GetMapping("/mypage")
+    public ResponseEntity<ApiResponseDto<?>> getMyPage(HttpServletRequest httpRequest) {
+
+        Long userId = jwtProvider.extractUserIdFromRequest(httpRequest);
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ApiResponseDto<>(401, "JWT 토큰이 유효하지 않습니다", null));
+        }
+        var data = userMypageService.getMypage(userId);
+
+        return ResponseEntity.ok(new ApiResponseDto<>(200,"마이페이지를 로드하는데 성공했습니다",data));
+
     }
 
 }

@@ -8,6 +8,7 @@ import com.example.kspot.itineraries.exception.ItineraryNotFoundException;
 import com.example.kspot.itineraries.exception.LocationNotFoundException;
 import com.example.kspot.users.exception.DuplicateNicknameException;
 import com.example.kspot.users.exception.NotEmailVerifiedException;
+import com.example.kspot.users.exception.NotFoundUserException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -63,7 +64,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DuplicateNicknameException.class)
     public ResponseEntity<String> handleDuplicateNickname(DuplicateNicknameException e, HttpServletRequest req) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage()); //409
+    }
+
+    @ExceptionHandler(NotFoundUserException.class)
+    public ResponseEntity<String> handleNotFoundUser(NotFoundUserException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage()); //404
     }
 
     //런타임 예외 처리
