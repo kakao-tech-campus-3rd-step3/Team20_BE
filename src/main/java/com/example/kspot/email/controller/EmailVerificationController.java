@@ -77,6 +77,4 @@ public class EmailVerificationController {
         return ResponseEntity.ok(Map.of("message", "인증 메일을 확인해 주세요(이미 인증된 경우 무시)."));
     }
 
-
-
 }
