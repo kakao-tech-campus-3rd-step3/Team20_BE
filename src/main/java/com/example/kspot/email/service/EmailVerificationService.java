@@ -1,6 +1,5 @@
 package com.example.kspot.email.service;
 
-import com.example.kspot.contents.dto.ApiResponseDto;
 import com.example.kspot.email.dto.EmailResponseDto;
 import com.example.kspot.email.entity.EmailVerificationToken;
 import com.example.kspot.email.exception.TokenNotFoundException;
@@ -9,8 +8,6 @@ import com.example.kspot.auth.jwt.JwtProvider;
 import com.example.kspot.users.entity.Users;
 import com.example.kspot.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -1,7 +1,7 @@
 package com.example.kspot.users.controller;
 
 import com.example.kspot.auth.jwt.JwtProvider;
-import com.example.kspot.contents.dto.ApiResponseDto;
+import com.example.kspot.global.dto.ApiResponseDto;
 import com.example.kspot.users.dto.*;
 import com.example.kspot.users.service.UserMypageService;
 import com.example.kspot.users.service.UserService;

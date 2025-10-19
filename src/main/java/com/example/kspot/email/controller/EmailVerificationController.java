@@ -1,10 +1,9 @@
 package com.example.kspot.email.controller;
 
 
-import com.example.kspot.contents.dto.ApiResponseDto;
+import com.example.kspot.global.dto.ApiResponseDto;
 import com.example.kspot.email.dto.EmailResponseDto;
 import com.example.kspot.email.service.EmailVerificationService;
-import com.example.kspot.email.dto.ResetPasswordDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

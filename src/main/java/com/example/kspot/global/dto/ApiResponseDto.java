@@ -1,4 +1,4 @@
-package com.example.kspot.contents.dto;
+package com.example.kspot.global.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
