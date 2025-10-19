@@ -1,6 +1,6 @@
 package com.example.kspot.contents.controller;
 
-import com.example.kspot.contents.dto.ApiResponseDto;
+import com.example.kspot.global.dto.ApiResponseDto;
 import com.example.kspot.contents.dto.ContentDetailResponse;
 import com.example.kspot.contents.dto.ContentItemDto;
 import com.example.kspot.contents.dto.ContentListResponse;

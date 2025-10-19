@@ -1,6 +1,6 @@
 package com.example.kspot.itineraries.controller;
 
-import com.example.kspot.contents.dto.ApiResponseDto;
+import com.example.kspot.global.dto.ApiResponseDto;
 import com.example.kspot.itineraries.dto.CreateItineraryRequest;
 import com.example.kspot.itineraries.dto.ItineraryResponseDto;
 import com.example.kspot.itineraries.service.ItineraryService;

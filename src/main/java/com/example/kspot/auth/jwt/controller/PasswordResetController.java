@@ -1,15 +1,12 @@
 package com.example.kspot.auth.jwt.controller;
 
 import com.example.kspot.auth.jwt.JwtProvider;
-import com.example.kspot.contents.dto.ApiResponseDto;
+import com.example.kspot.global.dto.ApiResponseDto;
 import com.example.kspot.email.dto.ResetPasswordDto;
 import com.example.kspot.email.service.EmailVerificationService;
-import com.example.kspot.users.dto.UserRequestDto;
 import com.example.kspot.users.dto.UserResetPwDto;
 import com.example.kspot.users.service.UserService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

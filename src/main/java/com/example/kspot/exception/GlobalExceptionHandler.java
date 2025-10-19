@@ -1,6 +1,6 @@
 package com.example.kspot.exception;
 
-import com.example.kspot.contents.dto.ApiResponseDto;
+import com.example.kspot.global.dto.ApiResponseDto;
 import com.example.kspot.email.exception.ExpiredTokenException;
 import com.example.kspot.email.exception.TokenAlreadyUsedException;
 import com.example.kspot.email.exception.TokenNotFoundException;
