@@ -1,5 +1,7 @@
 package com.example.kspot.locations.controller;
 
+import com.example.kspot.contents.dto.ContentListResponse;
+import com.example.kspot.global.dto.ApiResponseDto;
 import com.example.kspot.locations.dto.LocationResponse;
 import com.example.kspot.locations.service.LocationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,9 +41,11 @@ public class LocationRestController {
             @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<LocationResponse> getLocationDetail(@Parameter(description = "조회할 촬영지의 ID", example = "5")
+    public ResponseEntity<ApiResponseDto<LocationResponse>> getLocationDetail(@Parameter(description = "조회할 촬영지의 ID", example = "5")
                                                                   @PathVariable Long id) {
-        LocationResponse response = locationService.getLocationDetail(id);
+        LocationResponse data = locationService.getLocationDetail(id);
+        ApiResponseDto<LocationResponse> response = new ApiResponseDto<>(200, "촬영지 조회 성공", data);
+
         return ResponseEntity.ok(response);
     }
 }
