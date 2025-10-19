@@ -104,9 +104,9 @@ public class UserService {
     }
 
     @Transactional
-    public void resetPassword(UserRequestDto dto) {
+    public void resetPassword(Long id , UserResetPwDto dto) {
 
-        Optional<Users> user = userRepository.findUsersByEmail(dto.email());
+        Optional<Users> user = userRepository.findById(id);
 
         if(!user.isPresent()){
             throw new BadCredentialsException("이메일이 존재하지 않습니다");

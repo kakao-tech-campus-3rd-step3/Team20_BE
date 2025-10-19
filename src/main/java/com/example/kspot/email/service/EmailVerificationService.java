@@ -1,5 +1,6 @@
 package com.example.kspot.email.service;
 
+import com.example.kspot.contents.dto.ApiResponseDto;
 import com.example.kspot.email.dto.EmailResponseDto;
 import com.example.kspot.email.entity.EmailVerificationToken;
 import com.example.kspot.email.exception.TokenNotFoundException;
@@ -8,6 +9,8 @@ import com.example.kspot.auth.jwt.JwtProvider;
 import com.example.kspot.users.entity.Users;
 import com.example.kspot.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -88,5 +91,22 @@ public class EmailVerificationService {
         if (user == null) return;
         issueAndSend(user.getUserId() , caseCode);
     }
+
+    public Long findUserIdByRawToken(String rawToken) {
+
+        String normalized = rawToken == null ? "" : rawToken.trim();
+
+        // 2) 서버에서 토큰을 해시해서 DB의 token_hash_hex 형식과 동일하게 맞춤
+        byte[] hash = tokenProvider.sha256(normalized);
+        String hex = HexFormat.of().formatHex(hash).toLowerCase();
+
+        EmailVerificationToken emailToken = tokenRepository.findByTokenHashHex(hex).orElseThrow(
+                () -> new TokenNotFoundException(hex)
+        );
+
+        return emailToken.getUser().getUserId();
+
+    }
+
 }
 
