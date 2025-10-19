@@ -23,9 +23,9 @@ public class PasswordResetController {
     private final JwtProvider jwtProvider;
 
     @PatchMapping
-    public ResponseEntity<ApiResponseDto<?>> resetPassword(@RequestBody UserResetPwDto dto , HttpServletRequest request) {
+    public ResponseEntity<ApiResponseDto<?>> resetPassword(@RequestBody UserResetPwDto dto) {
 
-        Long userId = emailVerificationService.findUserIdByRawToken(request.getHeader("Authorization"));
+        Long userId = emailVerificationService.findUserIdByRawToken(dto.rawToken());
 
         userService.resetPassword(userId ,dto);
         return ResponseEntity.ok(new ApiResponseDto<>(200 , "비밀번호 변경에 성공했습니다!" , null));
