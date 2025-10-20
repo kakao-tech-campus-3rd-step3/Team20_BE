@@ -60,14 +60,14 @@ public class JwtProvider {
     public Long extractUserIdFromRequest(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return null;
+            throw new SecurityException("Authorization header is invalid");
         }
 
         String token = authHeader.substring(7);
         try {
             return validateToken(token); // 이미 구현된 메서드 재사용
         } catch (Exception e) {
-            return null;
+            throw new SecurityException("Invalid JWT token");
         }
     }
 }
