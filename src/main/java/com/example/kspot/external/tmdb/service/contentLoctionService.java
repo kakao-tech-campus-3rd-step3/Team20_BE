@@ -1,5 +1,6 @@
 package com.example.kspot.external.tmdb.service;
 
+import com.example.kspot.external.tmdb.exception.CsvParsingException;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 import java.io.BufferedReader;
@@ -30,8 +31,8 @@ public class contentLoctionService {
       String[] cols;
       while ((cols = csvReader.readNext()) != null) {
         // 컬럼 개수가 부족하면 스킵
-        if (cols.length < 6) {
-          continue;
+        if (cols.length < 14) {
+          throw new CsvParsingException("컬럼 수 부족: 최소 6개 필요, 현재 컬럼 수 : " + cols.length);
         }
 
         String mediaType = cols[1].trim().replaceAll("^\"|\"$", "").toLowerCase();
@@ -56,8 +57,8 @@ public class contentLoctionService {
 
       log.info("✅ CSV import complete.");
 
-    } catch (IOException | CsvValidationException e) {
-      throw new RuntimeException(e);
+    } catch (IOException | CsvValidationException e ) {
+      throw new CsvParsingException("CSV File 처리 중 오류 발생!!!",e);
     }
   }
 
