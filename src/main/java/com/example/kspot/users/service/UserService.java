@@ -104,6 +104,13 @@ public class UserService {
     }
 
     @Transactional
+    public void logout(Long userId) {
+        Users user = userRepository.findById(userId).orElse(null);
+        user.setRefreshToken(null);
+        userRepository.save(user);
+    }
+
+    @Transactional
     public void resetPassword(Long id , UserResetPwDto dto) {
 
         Optional<Users> user = userRepository.findById(id);

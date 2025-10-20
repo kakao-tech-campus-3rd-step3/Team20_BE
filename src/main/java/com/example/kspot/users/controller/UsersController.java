@@ -163,4 +163,44 @@ public class UsersController {
 
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletRequest httpRequest) {
+        Long userId = jwtProvider.extractUserIdFromRequest(httpRequest);
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        userService.logout(userId);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/status")
+    public ResponseEntity<ApiResponseDto<?>> getStatus(HttpServletRequest httpRequest) {
+        Long userId = jwtProvider.extractUserIdFromRequest(httpRequest);
+
+
+
+
+        return ResponseEntity.ok(new ApiResponseDto<>(200 , "로그인 상태 확인" , ));
+
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResponseDto<?>> refresh(HttpServletRequest httpRequest) {
+        String refreshToken = jwtProvider.extractTokenFromRequest(httpRequest);
+
+        ResponseCookie accessToken = ResponseCookie.from("__Host-access_token", userService.getRefreshToken(refreshToken))
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .sameSite("Strict")
+                .maxAge(accessTtl)
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .header(HttpHeaders.SET_COOKIE, refreshToken)
+                .body(new ApiResponseDto<>(200 , "accessToken 재발급" , null ));
+    }
+
 }
