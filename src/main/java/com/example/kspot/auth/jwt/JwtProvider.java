@@ -5,6 +5,7 @@ import com.example.kspot.users.entity.Users;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +23,15 @@ public class JwtProvider {
     private long accessTtl;
     @Value("${jwt.refresh-ttl}")
     private long refreshTtl;
+
+    private static final String[] COOKIE_NAMES = {
+            "__Host-access_token",
+            "__Host-refresh_token",
+            "ACCESS_TOKEN",
+            "access_token",
+            "REFRESH_TOKEN",
+            "refresh_token"
+    };
 
     public String generateAccessToken(Users user) {
         Instant now = Instant.now();
@@ -61,11 +71,26 @@ public class JwtProvider {
 
     public String extractTokenFromRequest(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new TokenNotFoundException("Authorization header is invalid");
+        if (authHeader != null && !authHeader.isBlank()) {
+            return authHeader.substring(7).trim();
         }
 
-        return authHeader.substring(7);
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie c : cookies) {
+                String name = c.getName();
+                for (String candidate : COOKIE_NAMES) {
+                    if (candidate.equalsIgnoreCase(name)) {
+                        String value = c.getValue();
+                        if (value != null && !value.isBlank()) {
+                            return value.trim();
+                        }
+                    }
+                }
+            }
+        }
+
+        throw new TokenNotFoundException("Authorization header is invalid");
     }
 
     public Instant getExpiration(String token) {
