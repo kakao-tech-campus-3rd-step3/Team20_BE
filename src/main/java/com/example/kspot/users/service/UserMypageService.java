@@ -19,7 +19,6 @@ import java.util.List;
 public class UserMypageService {
 
     private final UserRepository userRepository;
-    private final JwtProvider jwtProvider;
     private final ItineraryService itineraryService;
 
     public MypageResponseDto getMypage(Long userId){

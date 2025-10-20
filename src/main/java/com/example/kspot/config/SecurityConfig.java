@@ -39,11 +39,9 @@ public class SecurityConfig {
     }
 
     public String encodePassword(String rawPassword) {
-        return new BCryptPasswordEncoder().encode(rawPassword + pepper);
+        return passwordEncoder().encode(rawPassword + pepper);
     }
-
     public boolean matches(String rawPassword, String encodedPassword) {
-        return new BCryptPasswordEncoder().matches(rawPassword + pepper, encodedPassword);
+        return passwordEncoder().matches(rawPassword + pepper, encodedPassword);
     }
-
 }
