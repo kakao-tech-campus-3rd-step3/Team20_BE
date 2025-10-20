@@ -106,10 +106,15 @@ public class UserService {
     }
 
     @Transactional
-    public void logout(Long userId) {
+    public UserTokenResponseDto logout(Long userId) {
         Users user = userRepository.findById(userId).orElse(null);
         user.setRefreshToken(null);
         userRepository.save(user);
+
+        String accessToken = jwtProvider.generateAccessToken(user);
+        String refreshToken = jwtProvider.generateRefreshToken(user);
+
+        return new UserTokenResponseDto(accessToken, refreshToken);
     }
 
     @Transactional
