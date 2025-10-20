@@ -1,7 +1,8 @@
 package com.example.kspot.external.tmdb.controller;
 
 import com.example.kspot.external.tmdb.service.TmdbContentService;
-import org.springframework.web.bind.annotation.GetMapping;
+import com.example.kspot.global.dto.ApiResponseDto;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,8 +16,10 @@ public class TmdbContentController {
   }
 
   @PostMapping("/api/tmdb/content/load")
-  public String loadTmdbData() throws Exception {
+  public ResponseEntity<ApiResponseDto<String>> loadTmdbData() throws Exception {
     loader.loadContentsFromFile();
-    return "✅ TMDB에서 Content관련 데이터(artist 연계 포함) 로딩 완료!";
+    ApiResponseDto<String> response =
+        new ApiResponseDto<>(200, "✅ TMDB에서 Content관련 데이터(artist 연계 포함) 로딩 완료!", null);
+    return ResponseEntity.ok(response);
   }
 }

@@ -48,7 +48,12 @@ class LocationRestControllerTest {
 
                 // Then: 200 응답 + 필드 값 검증
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("더현대 서울"));
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.message").value("촬영지 조회 성공"))
+                .andExpect(jsonPath("$.data.name").value("더현대 서울"))
+                .andExpect(jsonPath("$.data.address").value("서울 영등포구 여의대로 108"))
+                .andExpect(jsonPath("$.data.latitude").value(37.5258))
+                .andExpect(jsonPath("$.data.longitude").value(126.9285));
     }
 
     @Test

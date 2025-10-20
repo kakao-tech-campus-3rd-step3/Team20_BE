@@ -1,6 +1,6 @@
 package com.example.kspot.contents.controller;
 
-import com.example.kspot.contents.dto.ApiResponseDto;
+import com.example.kspot.global.dto.ApiResponseDto;
 import com.example.kspot.contents.dto.ContentDetailResponse;
 import com.example.kspot.contents.dto.ContentItemDto;
 import com.example.kspot.contents.dto.ContentListResponse;
@@ -41,9 +41,9 @@ public class ContentRestController {
   // 1. 전체 콘텐츠 조회
   @Operation(summary = "전체 콘텐츠 목록 조회", description = "모든 콘텐츠를 페이지네이션 형태로 조회합니다.")
   @ApiResponses({
-          @ApiResponse(responseCode = "200", description = "콘텐츠 목록 조회 성공"),
-          @ApiResponse(responseCode = "401", description = "인증 실패 - 유효하지 않은 또는 누락된 토큰"),
-          @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+          @ApiResponse(responseCode = "200", ref = "#/components/responses/Ok"),
+          @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
+          @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
   })
   @GetMapping
   public ResponseEntity<ApiResponseDto<ContentListResponse>> getAllContents(Pageable pageable) {
@@ -75,10 +75,10 @@ public class ContentRestController {
   // 2. id로 특정 콘텐츠 조회
   @Operation(summary = "콘텐츠 상세 조회", description = "콘텐츠 ID를 이용해 상세 정보를 조회합니다.")
   @ApiResponses({
-          @ApiResponse(responseCode = "200", description = "콘텐츠 상세 조회 성공"),
-          @ApiResponse(responseCode = "401", description = "인증 실패 - 유효하지 않은 또는 누락된 토큰"),
-          @ApiResponse(responseCode = "404", description = "콘텐츠를 찾을 수 없음"),
-          @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+          @ApiResponse(responseCode = "200", ref = "#/components/responses/Ok"),
+          @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
+          @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound"),
+          @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
   })
   @GetMapping("/{id}")
   public ResponseEntity<ApiResponseDto<ContentDetailResponse>> getContentById(@Parameter(description = "조회할 콘텐츠의 고유 ID", example = "1")
@@ -97,9 +97,10 @@ public class ContentRestController {
   // 3. title로 연관 콘텐츠 간략조회
   @Operation(summary = "연관 콘텐츠 검색", description = "제목 키워드로 콘텐츠를 검색합니다.")
   @ApiResponses({
-          @ApiResponse(responseCode = "200", description = "연관 콘텐츠 조회 성공"),
-          @ApiResponse(responseCode = "401", description = "인증 실패 - 유효하지 않은 또는 누락된 토큰"),
-          @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+          @ApiResponse(responseCode = "200", ref = "#/components/responses/Ok"),
+          @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
+          @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound"),
+          @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
   })
   @GetMapping("/search")
   public ResponseEntity<ApiResponseDto<ContentListResponse>> getAllContentsByTitle(@Parameter(description = "검색할 콘텐츠 제목 키워드", example = "오징어")
@@ -131,9 +132,10 @@ public class ContentRestController {
   // 4. content id로 연관 location 조회
   @Operation(summary = "콘텐츠 관련 장소 조회", description = "콘텐츠 ID로 관련 촬영 장소 목록을 조회합니다.")
   @ApiResponses({
-          @ApiResponse(responseCode = "200", description = "콘텐츠 관련 장소 조회 성공"),
-          @ApiResponse(responseCode = "401", description = "인증 실패 - 유효하지 않은 또는 누락된 토큰"),
-          @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+          @ApiResponse(responseCode = "200", ref = "#/components/responses/Ok"),
+          @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
+          @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound"),
+          @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
   })
   @GetMapping("{id}/related-location")
   public ResponseEntity<ApiResponseDto<List<ContentLocationResponse>>> getRelatedLocations( @Parameter(description = "콘텐츠의 고유 ID", example = "1")
@@ -152,9 +154,10 @@ public class ContentRestController {
   //5.인기 콘텐츠 조회(전체/카테고리)
   @Operation(summary = "인기 콘텐츠 조회", description = "카테고리별 혹은 전체 인기 콘텐츠를 조회합니다.")
   @ApiResponses({
-          @ApiResponse(responseCode = "200", description = "인기 콘텐츠 조회 성공"),
-          @ApiResponse(responseCode = "401", description = "인증 실패 - 유효하지 않은 또는 누락된 토큰"),
-          @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+          @ApiResponse(responseCode = "200", ref = "#/components/responses/Ok"),
+          @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
+          @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound"),
+          @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
   })
   @GetMapping("/popular")
   public ResponseEntity<ApiResponseDto<ContentListResponse>> getPopularContents(

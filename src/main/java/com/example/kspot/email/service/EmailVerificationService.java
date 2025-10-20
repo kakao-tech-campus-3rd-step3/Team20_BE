@@ -1,8 +1,10 @@
 package com.example.kspot.email.service;
 
+import com.example.kspot.email.dto.EmailResponseDto;
 import com.example.kspot.email.entity.EmailVerificationToken;
 import com.example.kspot.email.exception.TokenNotFoundException;
 import com.example.kspot.email.repository.EmailVerificationTokenRepository;
+import com.example.kspot.auth.jwt.JwtProvider;
 import com.example.kspot.users.entity.Users;
 import com.example.kspot.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,12 +22,12 @@ public class EmailVerificationService {
     private final EmailVerificationTokenRepository tokenRepository;
     private final EmailSender emailSender;
     private final TokenProvider tokenProvider;
+    private final JwtProvider jwtProvider;
 
     @Transactional
-    public void issueAndSend(Long userId) {
+    public void issueAndSend(Long userId , int caseCode) {
         Users user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다"));
-        if (user.isEmailVerified()) return;
 
         tokenRepository.invalidateAllActiveByUserId(userId);
 
@@ -39,11 +41,16 @@ public class EmailVerificationService {
         token.setExpiresAt(LocalDateTime.now().plusMinutes(15));
         tokenRepository.save(token);
 
-        emailSender.sendVerificationMail(user.getEmail(), raw);
+        switch (caseCode) {
+            case 0 -> emailSender.sendVerificationMail(user.getEmail(), raw);
+            case 1 -> emailSender.sendResetPasswordMail(user.getEmail(), raw);
+            default -> {}
+        }
+
     }
 
     @Transactional
-    public void verifyByRawToken(String rawToken) {
+    public EmailResponseDto verifyByRawToken(String rawToken) {
         byte[] hash = tokenProvider.sha256(rawToken);
         String hex = HexFormat.of().formatHex(hash).toLowerCase();
         EmailVerificationToken t = tokenRepository.findByTokenHashHex(hex)
@@ -62,15 +69,41 @@ public class EmailVerificationService {
 
         t.setUsed(true);
         tokenRepository.save(t);
+
+        String accessToken = jwtProvider.generateAccessToken(user);
+        String refreshToken = jwtProvider.generateRefreshToken(user);
+
+        user.setRefreshToken(refreshToken);
+        userRepository.save(user);
+
+        return new EmailResponseDto(accessToken, refreshToken);
+
     }
 
     @Transactional
-    public void resend(String email) {
+    public void send(String email , int caseCode) {
         Users user = userRepository.findUsersByEmail(email).orElseThrow(
                 () -> new IllegalArgumentException("유저를 찾지 못했습니다.")
         );
-        if (user == null || user.isEmailVerified()) return;
-        issueAndSend(user.getUserId());
+        if (user == null) return;
+        issueAndSend(user.getUserId() , caseCode);
     }
+
+    public Long findUserIdByRawToken(String rawToken) {
+
+        String normalized = rawToken == null ? "" : rawToken.trim();
+
+        // 2) 서버에서 토큰을 해시해서 DB의 token_hash_hex 형식과 동일하게 맞춤
+        byte[] hash = tokenProvider.sha256(normalized);
+        String hex = HexFormat.of().formatHex(hash).toLowerCase();
+
+        EmailVerificationToken emailToken = tokenRepository.findByTokenHashHex(hex).orElseThrow(
+                () -> new TokenNotFoundException(hex)
+        );
+
+        return emailToken.getUser().getUserId();
+
+    }
+
 }
 

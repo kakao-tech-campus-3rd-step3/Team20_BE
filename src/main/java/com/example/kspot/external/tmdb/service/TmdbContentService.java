@@ -2,19 +2,21 @@ package com.example.kspot.external.tmdb.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Value;
-import okhttp3.*;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
 
 
 @Slf4j
@@ -80,7 +82,22 @@ public class TmdbContentService {
       return;
     }
 
-    JSONObject item = results.getJSONObject(0);
+    // ✅ overview가 비어있지 않은 첫 번째 객체 찾기
+    JSONObject item = null;
+    for (int i = 0; i < results.length(); i++) {
+      JSONObject candidate = results.getJSONObject(i);
+      String overview = candidate.optString("overview", "").trim();
+      if (!overview.isEmpty()) {
+        item = candidate;
+        break;
+      }
+    }
+
+    // ✅ 만약 모든 객체의 overview가 비어있다면 첫 번째 객체 사용
+    if (item == null) {
+      item = results.getJSONObject(0);
+    }
+
     Long contentId = item.getLong("id");
     String mediaType = item.optString("media_type", category); // movie or tv
     String title = item.optString("title", item.optString("name", "제목없음"));
@@ -93,22 +110,23 @@ public class TmdbContentService {
     String backdropUrl = backdropPath != null ? BACKDROP_BASE_URL + backdropPath : null;
 
     jdbcTemplate.update("""
-                INSERT INTO contents (content_id, category, title, poster_image_url, release_date, popularity, background_poster)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-                ON DUPLICATE KEY UPDATE
-                    title = VALUES(title),
-                    poster_image_url = VALUES(poster_image_url),
-                    release_date = VALUES(release_date),
-                    popularity = VALUES(popularity),
-                    background_poster = VALUES(background_poster)
-                """,
+            INSERT INTO contents (content_id, category, title, poster_image_url, release_date, popularity, background_poster)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+                title = VALUES(title),
+                poster_image_url = VALUES(poster_image_url),
+                release_date = VALUES(release_date),
+                popularity = VALUES(popularity),
+                background_poster = VALUES(background_poster)
+            """,
         contentId, category, title, posterUrl, releaseDate, popularity, backdropUrl
     );
     log.info("✅ 컨텐츠 삽입 완료: {} ({})", contentId, mediaType);
     insertContentArtists(contentId, mediaType);
   }
 
-  private void insertContentArtists(Long contentId, String mediaType) throws IOException, JSONException {
+  private void insertContentArtists(Long contentId, String mediaType)
+      throws IOException, JSONException {
     String creditsUrl = String.format(
         "https://api.themoviedb.org/3/%s/%d/credits?language=ko-KR",
         mediaType.equalsIgnoreCase("tv") ? "tv" : "movie", contentId
@@ -137,7 +155,9 @@ public class TmdbContentService {
     for (int i = 0; i < castArray.length(); i++) {
       JSONObject cast = castArray.getJSONObject(i);
       Long artistId = cast.optLong("id", -1);
-      if (artistId == -1) continue;
+      if (artistId == -1) {
+        continue;
+      }
 
       // ✅ artist_id가 존재하는 경우만 삽입
       int exists = jdbcTemplate.queryForObject(
@@ -145,12 +165,14 @@ public class TmdbContentService {
           Integer.class,
           artistId
       );
-      if (exists == 0) continue;
+      if (exists == 0) {
+        continue;
+      }
 
       jdbcTemplate.update("""
-              INSERT IGNORE INTO content_artist (content_id, artist_id)
-              VALUES (?, ?)
-              """, contentId, artistId);
+          INSERT IGNORE INTO content_artist (content_id, artist_id)
+          VALUES (?, ?)
+          """, contentId, artistId);
     }
 
     log.info("✅ 출연진 삽입 완료: {} ({})", contentId, mediaType);

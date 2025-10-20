@@ -1,10 +1,9 @@
 package com.example.kspot.users.controller;
 
-import com.example.kspot.contents.dto.ApiResponseDto;
-import com.example.kspot.users.dto.UserInfoResponseDto;
-import com.example.kspot.users.dto.UserRequestDto;
-import com.example.kspot.users.dto.UserUpdataRequestDto;
-import com.example.kspot.users.dto.UserUpdateResponseDto;
+import com.example.kspot.auth.jwt.JwtProvider;
+import com.example.kspot.global.dto.ApiResponseDto;
+import com.example.kspot.users.dto.*;
+import com.example.kspot.users.service.UserMypageService;
 import com.example.kspot.users.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -13,28 +12,41 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
+import java.util.Date;
+
 @Tag(name="Users", description = "사용자 관련 API(회원가입, 로그인, 회원관리)")
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/users")
 public class UsersController {
 
+    @Value("${jwt.access-ttl}")
+    private long accessTtl;
+    @Value("${jwt.refresh-ttl}")
+    private long refreshTtl;
+
+    private final UserMypageService userMypageService;
     private final UserService userService;
-    public UsersController(UserService userService) {
-        this.userService = userService;
-    }
+    private final JwtProvider jwtProvider;
 
     //1. 전체 사용자 조회
     @Operation(summary = "전체 사용자 조회", description = "등록된 모든 사용자의 정보를 조회합니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "사용자 목록 조회 성공",
+            @ApiResponse(responseCode = "200", ref = "#/components/responses/Ok",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ApiResponseDto.class))),
-            @ApiResponse(responseCode = "401", description = "인증 실패 - 유효하지 않은 또는 누락된 토큰"),
-            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
+            @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
     })
     @GetMapping
     public ResponseEntity<ApiResponseDto<?>> getUsers() {
@@ -47,9 +59,9 @@ public class UsersController {
     //2. 특정 사용자 조회
     @Operation(summary = "특정 사용자 조회", description = "사용자 ID를 통해 특정 사용자의 정보를 조회합니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "사용자 조회 성공"),
-            @ApiResponse(responseCode = "404", description = "해당 사용자를 찾을 수 없음"),
-            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            @ApiResponse(responseCode = "200", ref = "#/components/responses/Ok"),
+            @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound"),
+            @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
     })
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponseDto<?>> getUsersById(@PathVariable long id) {
@@ -62,24 +74,25 @@ public class UsersController {
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "회원가입 성공",
                     content = @Content(schema = @Schema(implementation = UserInfoResponseDto.class))),
-            @ApiResponse(responseCode = "400", description = "요청 데이터 오류"),
-            @ApiResponse(responseCode = "409", description = "이미 존재하는 사용자"),
-            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
+            @ApiResponse(responseCode = "409", ref = "#/components/responses/Conflict"),
+            @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
     })
     @PostMapping
     public ResponseEntity<?> createUser(@RequestBody UserRequestDto user) {
-        var data = userService.register(user);
+
+        userService.register(user);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new ApiResponseDto<>(204 , "회원가입 성공" , data));
+                .body(new ApiResponseDto<>(201 , "이메일을 확인해 주세요" , null));
     }
 
     //4. 사용자 이름 수정
     @Operation(summary = "사용자 정보 수정", description = "사용자의 이름을 수정합니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "수정 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
-            @ApiResponse(responseCode = "404", description = "해당 사용자를 찾을 수 없음"),
-            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            @ApiResponse(responseCode = "200", ref = "#/components/responses/Ok"),
+            @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
+            @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound"),
+            @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
     })
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponseDto<?>> updateUser( @Parameter(description = "수정할 사용자 ID", example = "1")
@@ -93,8 +106,8 @@ public class UsersController {
     @Operation(summary = "사용자 삭제", description = "특정 사용자를 삭제합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "삭제 성공 (본문 없음)"),
-            @ApiResponse(responseCode = "404", description = "해당 사용자를 찾을 수 없음"),
-            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound"),
+            @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@Parameter(description = "삭제할 사용자 ID", example = "1")
@@ -106,17 +119,87 @@ public class UsersController {
     //6.로그인
     @Operation(summary = "로그인", description = "이메일과 비밀번호를 이용해 로그인하고, Access Token을 발급받습니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "로그인 성공 - 토큰 반환",
+            @ApiResponse(responseCode = "200", ref = "#/components/responses/Ok",
                     content = @Content(schema = @Schema(example = "{\"accessToken\": \"JWT_ACCESS_TOKEN_HERE\"}"))),
-            @ApiResponse(responseCode = "400", description = "잘못된 로그인 요청"),
-            @ApiResponse(responseCode = "401", description = "인증 실패 - 비밀번호 불일치 또는 계정 없음"),
-            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
+            @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
+            @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
     })
     @PostMapping("/login")
     public ResponseEntity<ApiResponseDto<?>> login(@RequestBody UserRequestDto dto) {
 
-        var accessToken = userService.login(dto);
-        return ResponseEntity.ok(new ApiResponseDto<>(200,"로그인 성공" , accessToken));
+        var token = userService.login(dto);
+
+        ResponseCookie refreshToken = ResponseCookie.from("__Host-refresh_token", token.refreshToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .sameSite("Strict")
+                .maxAge(refreshTtl)
+                .build();
+
+        ResponseCookie accessToken = ResponseCookie.from("__Host-access_token", token.accessToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .sameSite("Strict")
+                .maxAge(accessTtl)
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, accessToken.toString())
+                .header(HttpHeaders.SET_COOKIE, refreshToken.toString())
+                .body(new ApiResponseDto<>(200, "로그인 성공", token.accessToken()));
+    }
+
+    @GetMapping("/mypage")
+    public ResponseEntity<ApiResponseDto<?>> getMyPage(HttpServletRequest httpRequest) {
+
+        Long userId = jwtProvider.extractUserIdFromRequest(httpRequest);
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ApiResponseDto<>(401, "JWT 토큰이 유효하지 않습니다", null));
+        }
+        var data = userMypageService.getMypage(userId);
+
+        return ResponseEntity.ok(new ApiResponseDto<>(200,"마이페이지를 로드하는데 성공했습니다",data));
+
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletRequest httpRequest) {
+        Long userId = jwtProvider.extractUserIdFromRequest(httpRequest);
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        userService.logout(userId);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/status")
+    public ResponseEntity<ApiResponseDto<?>> getStatus(HttpServletRequest httpRequest) {
+        String accessToken = jwtProvider.extractTokenFromRequest(httpRequest);
+        var dto = new UserStatusResponseDto(userService.getStatus(accessToken));
+        return ResponseEntity.ok(new ApiResponseDto<>(200 , "로그인 상태 확인" , dto));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResponseDto<?>> refresh(HttpServletRequest httpRequest) {
+        String refreshToken = jwtProvider.extractTokenFromRequest(httpRequest);
+
+        ResponseCookie accessToken = ResponseCookie.from("__Host-access_token", userService.getRefreshToken(refreshToken))
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .sameSite("Strict")
+                .maxAge(accessTtl)
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .header(HttpHeaders.SET_COOKIE, String.valueOf(accessToken))
+                .body(new ApiResponseDto<>(200 , "accessToken 재발급" , null ));
     }
 
 }
