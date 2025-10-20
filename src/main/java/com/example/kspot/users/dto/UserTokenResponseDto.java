@@ -1,5 +1,5 @@
 package com.example.kspot.users.dto;
 
-public record UserResponseDto(
+public record UserTokenResponseDto(
         String accessToken,
         String refreshToken) {}

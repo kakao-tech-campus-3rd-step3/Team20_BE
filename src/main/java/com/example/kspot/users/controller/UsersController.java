@@ -21,6 +21,9 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
+import java.util.Date;
+
 @Tag(name="Users", description = "사용자 관련 API(회원가입, 로그인, 회원관리)")
 @RestController
 @RequiredArgsConstructor
@@ -176,13 +179,9 @@ public class UsersController {
 
     @GetMapping("/status")
     public ResponseEntity<ApiResponseDto<?>> getStatus(HttpServletRequest httpRequest) {
-        Long userId = jwtProvider.extractUserIdFromRequest(httpRequest);
-
-
-
-
-        return ResponseEntity.ok(new ApiResponseDto<>(200 , "로그인 상태 확인" , ));
-
+        String accessToken = jwtProvider.extractTokenFromRequest(httpRequest);
+        var dto = new UserStatusResponseDto(userService.getStatus(accessToken));
+        return ResponseEntity.ok(new ApiResponseDto<>(200 , "로그인 상태 확인" , dto));
     }
 
     @PostMapping("/refresh")
@@ -199,7 +198,7 @@ public class UsersController {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .header(HttpHeaders.SET_COOKIE, refreshToken)
+                .header(HttpHeaders.SET_COOKIE, String.valueOf(accessToken))
                 .body(new ApiResponseDto<>(200 , "accessToken 재발급" , null ));
     }
 
