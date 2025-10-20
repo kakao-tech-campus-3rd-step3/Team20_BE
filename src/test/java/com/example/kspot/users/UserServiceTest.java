@@ -4,7 +4,7 @@ import com.example.kspot.config.SecurityConfig;
 import com.example.kspot.email.service.EmailVerificationService;
 import com.example.kspot.auth.jwt.JwtProvider;
 import com.example.kspot.users.dto.UserRequestDto;
-import com.example.kspot.users.dto.UserResponseDto;
+import com.example.kspot.users.dto.UserTokenResponseDto;
 import com.example.kspot.users.entity.Users;
 import com.example.kspot.users.exception.NotEmailVerifiedException;
 import com.example.kspot.users.repository.UserRepository;
@@ -99,7 +99,7 @@ class UserServiceTest {
             when(jwtProvider.generateRefreshToken(savedUser)).thenReturn("REFRESH.JWT.TOKEN");
 
             // when
-            UserResponseDto dto = userService.login(signupDto);
+            UserTokenResponseDto dto = userService.login(signupDto);
 
             // then
             assertThat(dto).isNotNull();
