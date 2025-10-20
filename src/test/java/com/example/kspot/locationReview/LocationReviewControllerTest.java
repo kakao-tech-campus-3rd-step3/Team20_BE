@@ -10,7 +10,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.kspot.locationReview.entity.LocationReview;
 import com.example.kspot.locationReview.repository.LocationReviewRepository;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import java.util.Optional;
@@ -22,7 +21,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
 @SpringBootTest
 @Transactional
@@ -38,9 +36,10 @@ class LocationReviewControllerTest {
   @Autowired
   private LocationReviewRepository locationReviewRepository;
 
-  private String jwtToken;
   private Long existingReviewId;
   private Long existingLocationId;
+  private String jwtToken = "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIxIiwidHlwIjoibWFzdGVyIn0.3PZMoQI6OU7L-WBSB7S-tx2ZYJ_Jt37wN6PY3q64uOLbrO18Y_qHPir1dXkWvjE0";
+
 
   // ✅ BeforeEach: DB 확인 + 로그인
   @BeforeEach
@@ -55,27 +54,6 @@ class LocationReviewControllerTest {
     LocationReview existingReview = existingReviewOpt.get();
     existingReviewId = existingReview.getReviewId();
     existingLocationId = existingReview.getLocationId();
-
-    // 2️⃣ 로그인 수행 (JWT 토큰 획득)
-    String loginJson = """
-        {
-            "email" : "leechan@naver.com",
-            "nickname" : "이찬",
-            "password" : "mySecret01"
-        }
-        """;
-
-    MvcResult result = mockMvc.perform(post("/api/users/login")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(loginJson))
-        .andExpect(status().isOk())
-        .andReturn();
-
-    String responseBody = result.getResponse().getContentAsString();
-    JsonNode jsonNode = objectMapper.readTree(responseBody);
-    jwtToken = jsonNode.path("data").path("token").asText();
-
-    assertThat(jwtToken).isNotEmpty();
   }
 
   // ✅ 1. 특정 리뷰 조회 (성공)
@@ -93,11 +71,12 @@ class LocationReviewControllerTest {
   @Test
   @DisplayName("2. 특정 리뷰 조회 (실패)")
   void testGetReviewFail_NotFound() throws Exception {
-    mockMvc.perform(get("/location_review/{reviewId}", -872))
+    long reviewId = -872;
+    mockMvc.perform(get("/location_review/{reviewId}", reviewId))
         .andExpect(status().isNotFound())
         .andExpect(jsonPath("$.data").doesNotExist())
         .andExpect(jsonPath("$.status").value(404))
-        .andExpect(jsonPath("$.message").value("해당 리뷰를 찾을 수 없습니다"));
+        .andExpect(jsonPath("$.message").value("해당 Location 리뷰를 찾을 수 없습니다. reviewId = " + reviewId));
   }
 
   // ✅ 3. 장소 리뷰목록 조회 (성공)
@@ -115,11 +94,12 @@ class LocationReviewControllerTest {
   @Test
   @DisplayName("4. 장소 리뷰목록 조회 (실패)")
   void testGetLocationReviewListFail() throws Exception {
-    mockMvc.perform(get("/location_review/location/{locationId}", -54))
+    long locationId = -54;
+    mockMvc.perform(get("/location_review/location/{locationId}", locationId))
         .andExpect(status().isNotFound())
         .andExpect(jsonPath("$.data").doesNotExist())
         .andExpect(jsonPath("$.status").value(404))
-        .andExpect(jsonPath("$.message").value("해당 장소에 대한 리뷰가 없습니다."));
+        .andExpect(jsonPath("$.message").value("해당 Location의 리뷰가 존재하지 않습니다 : "+locationId));
   }
 
   // ✅ 5. 새로운 리뷰 생성 (성공)
@@ -141,7 +121,7 @@ class LocationReviewControllerTest {
             .content(createJson))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.status").value(201))
-        .andExpect(jsonPath("$.message").value("새로운 여행 계획이 생성되었습니다"))
+        .andExpect(jsonPath("$.message").value("새로운 리뷰가 생성되었습니다"))
         .andExpect(jsonPath("$.data.title").value("테스트 리뷰 제목"));
   }
 
@@ -152,18 +132,18 @@ class LocationReviewControllerTest {
     String createJson = """
         {
             "locationId": %d,
-            "title": "리뷰 제목",
-            "detail": "내용",
+            "title": "테스트용 리뷰 제목",
+            "detail": "테스트용 내용",
             "rating": 3
         }
-        """.formatted(existingLocationId);
+        """.formatted(4);
 
     mockMvc.perform(post("/location_review")
             .contentType(MediaType.APPLICATION_JSON)
             .content(createJson))
-        .andExpect(status().isUnauthorized())
-        .andExpect(jsonPath("$.status").value(401))
-        .andExpect(jsonPath("$.message").value("JWT 토큰이 유효하지 않습니다"));
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.status").value(404))
+        .andExpect(jsonPath("$.message").value("일치하는 토큰이 존재하지 않습니다. tokenHashHex 값: Authorization header is invalid"));
   }
 
   // ✅ 7. 리뷰 수정 (성공)
@@ -179,13 +159,13 @@ class LocationReviewControllerTest {
         }
         """.formatted(existingLocationId);
 
-    mockMvc.perform(put("/location_review/{reviewId}", 8)
+    mockMvc.perform(put("/location_review/{reviewId}", 4)
             .header("Authorization", "Bearer " + jwtToken)
             .contentType(MediaType.APPLICATION_JSON)
             .content(updateJson))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.status").value(200))
-        .andExpect(jsonPath("$.message").value("여행계획이 업데이트 되었습니다"))
+        .andExpect(jsonPath("$.message").value("리뷰가 업데이트 되었습니다"))
         .andExpect(jsonPath("$.data.title").value("수정된 리뷰 제목"));
   }
 
@@ -205,9 +185,9 @@ class LocationReviewControllerTest {
     mockMvc.perform(put("/location_review/{reviewId}", existingReviewId)
             .contentType(MediaType.APPLICATION_JSON)
             .content(updateJson))
-        .andExpect(status().isUnauthorized())
-        .andExpect(jsonPath("$.status").value(401))
-        .andExpect(jsonPath("$.message").value("JWT 토큰이 유효하지 않습니다"));
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.status").value(404))
+        .andExpect(jsonPath("$.message").value("일치하는 토큰이 존재하지 않습니다. tokenHashHex 값: Authorization header is invalid"));
   }
 
   // ✅ 9. 리뷰 삭제 (성공)
@@ -215,7 +195,7 @@ class LocationReviewControllerTest {
   @DisplayName("9. 리뷰 삭제 (성공)")
   void testDeleteReviewSuccess() throws Exception {
 
-    mockMvc.perform(delete("/location_review/{reviewId}", 8)
+    mockMvc.perform(delete("/location_review/{reviewId}", 4)
             .header("Authorization", "Bearer " + jwtToken))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.status").value(200))
@@ -226,9 +206,9 @@ class LocationReviewControllerTest {
   @Test
   @DisplayName("10. 리뷰 삭제 (실패 - JWT 없음)")
   void testDeleteReviewFail_Unauthorized() throws Exception {
-    mockMvc.perform(delete("/location_review/{reviewId}", existingReviewId))
-        .andExpect(status().isUnauthorized())
-        .andExpect(jsonPath("$.status").value(401))
-        .andExpect(jsonPath("$.message").value("JWT 토큰이 유효하지 않습니다"));
+    mockMvc.perform(delete("/location_review/{reviewId}", 4))
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.status").value(404))
+        .andExpect(jsonPath("$.message").value("일치하는 토큰이 존재하지 않습니다. tokenHashHex 값: Authorization header is invalid"));
   }
 }

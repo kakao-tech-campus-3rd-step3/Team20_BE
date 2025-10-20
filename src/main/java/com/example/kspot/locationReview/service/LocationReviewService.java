@@ -2,13 +2,14 @@ package com.example.kspot.locationReview.service;
 
 import com.example.kspot.locationReview.dto.CreateLocationReviewRequest;
 import com.example.kspot.locationReview.entity.LocationReview;
+import com.example.kspot.locationReview.exception.LocationReviewIdNotFoundException;
 import com.example.kspot.locationReview.exception.LocationReviewNotFoundException;
 import com.example.kspot.locationReview.repository.LocationReviewRepository;
 import com.example.kspot.locations.exception.LocationNotFoundException;
 import com.example.kspot.locations.repository.LocationRepository;
 import com.example.kspot.users.repository.UserRepository;
 import java.time.LocalDateTime;
-import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -52,19 +53,24 @@ public class LocationReviewService {
   }
 
   // ReviewId를 통한 리뷰 조회
-  public Optional<LocationReview> findByLocationReviewId(Long locationReviewId) {
-    return locationReviewRepository.findByReviewId(locationReviewId);
+  public LocationReview findByLocationReviewIdOrThrow(Long locationReviewId) {
+    return locationReviewRepository.findByReviewId(locationReviewId)
+        .orElseThrow(() -> new LocationReviewIdNotFoundException(locationReviewId));
   }
 
   // LocationId를 통한 장소에 대한 리뷰목록 조회
-  public Page<LocationReview> findByLocationId(Long locationId, Pageable pageable) {
-    return locationReviewRepository.findByLocationId(locationId, pageable);
+  public Page<LocationReview> findByLocationIdOrThrow(Long locationId, Pageable pageable) {
+    Page<LocationReview> reviews = locationReviewRepository.findByLocationId(locationId, pageable);
+    if (reviews.isEmpty()) {
+      throw new LocationReviewNotFoundException(locationId);
+    }
+    return reviews;
   }
 
   // userID + ReviewId를 통한 리뷰 수정
   public LocationReview updateReview(Long userId, Long reviewId, CreateLocationReviewRequest updateReview) {
     LocationReview existingReview = locationReviewRepository.findByReviewId(reviewId)
-        .orElseThrow(() -> new LocationReviewNotFoundException("리뷰를 찾을 수 없습니다"));
+        .orElseThrow(() -> new LocationReviewIdNotFoundException(reviewId));
 
     if (!existingReview.getUserId().equals(userId)) {
       throw new SecurityException("본인의 리뷰만 수정할 수 있습니다");
@@ -82,7 +88,7 @@ public class LocationReviewService {
   // userID + ReviewId를 통한 리뷰 삭제
   public void deleteReview(Long userId, Long reviewId) {
     LocationReview existingReview = locationReviewRepository.findByReviewId(reviewId)
-        .orElseThrow(() -> new LocationReviewNotFoundException("리뷰를 찾을 수 없습니다"));
+        .orElseThrow(() -> new LocationReviewIdNotFoundException(reviewId));
 
     if (!existingReview.getUserId().equals(userId)) {
       throw new SecurityException("본인의 리뷰만 삭제할 수 있습니다");

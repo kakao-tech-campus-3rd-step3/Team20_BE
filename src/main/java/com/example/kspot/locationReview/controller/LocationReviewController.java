@@ -1,8 +1,8 @@
 package com.example.kspot.locationReview.controller;
 
-import com.example.kspot.global.dto.ApiResponseDto;
-import com.example.kspot.contents.dto.PaginationDto;
 import com.example.kspot.auth.jwt.JwtProvider;
+import com.example.kspot.contents.dto.PaginationDto;
+import com.example.kspot.global.dto.ApiResponseDto;
 import com.example.kspot.locationReview.dto.CreateLocationReviewRequest;
 import com.example.kspot.locationReview.dto.LocationReviewDto;
 import com.example.kspot.locationReview.dto.LocationReviewListDto;
@@ -17,8 +17,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Tag(name = "location_review", description = "장소 관련 리뷰 API")
 @RequestMapping("/location_review")
+@Slf4j
 public class LocationReviewController {
 
   private final LocationReviewService locationReviewService;
@@ -64,20 +65,14 @@ public class LocationReviewController {
 
   @GetMapping("/{reviewId}")
   public ResponseEntity<ApiResponseDto<LocationReviewDto>> getLocationReview(
-      @Parameter(description = "조회할 여행 계획의 ID", example = "1")
+      @Parameter(description = "조회할 리뷰의 ID", example = "1")
       @PathVariable Long reviewId) {
-    Optional<LocationReview> review = locationReviewService.findByLocationReviewId(reviewId);
+    LocationReview review = locationReviewService.findByLocationReviewIdOrThrow(reviewId);
+    LocationReviewDto locationReviewDto = LocationReviewDto.fromEntity(review);
 
-    if (review.isPresent()) {
-      LocationReviewDto locationReviewDto = LocationReviewDto.fromEntity(review.get());
-      ApiResponseDto<LocationReviewDto> response = new ApiResponseDto<>(200, "리뷰 상세 조회 성공",
-          locationReviewDto);
-      return ResponseEntity.ok(response);
-    } else {
-      ApiResponseDto<LocationReviewDto> response = new ApiResponseDto<>(404, "해당 리뷰를 찾을 수 없습니다",
-          null);
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-    }
+    ApiResponseDto<LocationReviewDto> response =
+        new ApiResponseDto<>(200, "리뷰 상세 조회 성공", locationReviewDto);
+    return ResponseEntity.ok(response);
   }
 
 
@@ -94,7 +89,7 @@ public class LocationReviewController {
 
   @GetMapping("/location/{locationId}")
   public ResponseEntity<ApiResponseDto<LocationReviewListDto>> getLocationReviewList(
-      @Parameter(description = "조회할 장소의 locaitonId", example = "1")
+      @Parameter(description = "조회할 장소의 locationId", example = "1")
       @PathVariable Long locationId,
       @Parameter(description = "페이지 번호 (0부터 시작)", example = "0")
       @RequestParam(defaultValue = "0") int page,
@@ -102,14 +97,7 @@ public class LocationReviewController {
       @RequestParam(defaultValue = "10") int size) {
 
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "reviewId"));
-    Page<LocationReview> reviewPage = locationReviewService.findByLocationId(locationId, pageable);
-
-    // 리뷰가 없을 경우
-    if (reviewPage.isEmpty()) {
-      ApiResponseDto<LocationReviewListDto> apiResponse =
-          new ApiResponseDto<>(404, "해당 장소에 대한 리뷰가 없습니다.", null);
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponse);
-    }
+    Page<LocationReview> reviewPage = locationReviewService.findByLocationIdOrThrow(locationId, pageable);
 
     // Page<Entity> → List<DTO>
     List<LocationReviewDto> reviewDtoList = reviewPage.getContent()
@@ -151,15 +139,11 @@ public class LocationReviewController {
       HttpServletRequest httpRequest
   ) {
     Long userId = jwtProvider.extractUserIdFromRequest(httpRequest);
-    if (userId == null) {
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-          .body(new ApiResponseDto<>(401, "JWT 토큰이 유효하지 않습니다", null));
-    }
 
     LocationReviewDto response = LocationReviewDto.fromEntity(
         locationReviewService.createReview(request, userId));
     return ResponseEntity.status(HttpStatus.CREATED).body(
-        new ApiResponseDto<>(201, "새로운 여행 계획이 생성되었습니다", response)
+        new ApiResponseDto<>(201, "새로운 리뷰가 생성되었습니다", response)
     );
   }
 
@@ -174,22 +158,18 @@ public class LocationReviewController {
       @ApiResponse(responseCode = "401", description = "인증 실패 - 유효하지 않은 또는 누락된 토큰"),
       @ApiResponse(responseCode = "500", description = "서버 내부 오류")
   })
-  @PutMapping("/{loctionReviewId}")
-  public ResponseEntity<ApiResponseDto<LocationReviewDto>> updateItinerary(
-      @PathVariable Long loctionReviewId,
+  @PutMapping("/{locationReviewId}")
+  public ResponseEntity<ApiResponseDto<LocationReviewDto>> updateLocationReview(
+      @PathVariable Long locationReviewId,
       @RequestBody CreateLocationReviewRequest request,
       HttpServletRequest httpRequest
   ) {
     Long userId = jwtProvider.extractUserIdFromRequest(httpRequest);
-    if (userId == null) {
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-          .body(new ApiResponseDto<>(401, "JWT 토큰이 유효하지 않습니다", null));
-    }
-
+    log.info("userId = " + userId);
     LocationReviewDto response = LocationReviewDto.fromEntity(
-        locationReviewService.updateReview(userId, loctionReviewId, request));
+        locationReviewService.updateReview(userId, locationReviewId, request));
     return ResponseEntity.status(HttpStatus.OK)
-        .body(new ApiResponseDto<>(200, "여행계획이 업데이트 되었습니다", response));
+        .body(new ApiResponseDto<>(200, "리뷰가 업데이트 되었습니다", response));
   }
 
   @Operation(
@@ -204,7 +184,7 @@ public class LocationReviewController {
   @DeleteMapping("/{locationReviewId}")
   public ResponseEntity<ApiResponseDto<LocationReviewDto>> deleteLoctionReview(
       @PathVariable Long locationReviewId,
-      HttpServletRequest httpRequest){
+      HttpServletRequest httpRequest) {
     Long userId = jwtProvider.extractUserIdFromRequest(httpRequest);
     if (userId == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

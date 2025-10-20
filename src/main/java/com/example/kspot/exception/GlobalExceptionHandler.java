@@ -7,6 +7,8 @@ import com.example.kspot.email.exception.TokenAlreadyUsedException;
 import com.example.kspot.email.exception.TokenNotFoundException;
 import com.example.kspot.itineraries.exception.ItineraryNotFoundException;
 import com.example.kspot.itineraries.exception.LocationNotFoundException;
+import com.example.kspot.locationReview.exception.LocationReviewIdNotFoundException;
+import com.example.kspot.locationReview.exception.LocationReviewNotFoundException;
 import com.example.kspot.users.exception.DuplicateNicknameException;
 import com.example.kspot.users.exception.NotEmailVerifiedException;
 import com.example.kspot.users.exception.NotFoundUserException;
@@ -44,8 +46,9 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(TokenNotFoundException.class)
-    public ResponseEntity<String> handleTokenNotFound(TokenNotFoundException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage()); //404
+    public ResponseEntity<ApiResponseDto<Void>> handleTokenNotFound(TokenNotFoundException e) {
+        ApiResponseDto<Void> response = new ApiResponseDto<>(404, e.getMessage(), null);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response); //404
     }
 
     @ExceptionHandler(ExpiredTokenException.class)
@@ -79,11 +82,23 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
     }
 
+    @ExceptionHandler(LocationReviewIdNotFoundException.class)
+    public ResponseEntity<ApiResponseDto<Void>> handleLocationReviewIdNotFound(LocationReviewIdNotFoundException e) {
+        ApiResponseDto<Void> response = new ApiResponseDto<>(404, e.getMessage(), null);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(LocationReviewNotFoundException.class)
+    public ResponseEntity<ApiResponseDto<Void>> handleLocationReviewNotFound(LocationReviewNotFoundException e) {
+        ApiResponseDto<Void> response = new ApiResponseDto<>(404, e.getMessage(), null);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
     //런타임 예외 처리
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ApiResponseDto<Void>> handleRuntimeException(RuntimeException e) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ApiResponseDto<>(500, "런타임 오류가 발생했습니다.", null));
+                .body(new ApiResponseDto<>(500, "런타임 오류가 발생했습니다. error : "+ e, null));
     }
 
     //최상위 예외처리
