@@ -1,9 +1,9 @@
 package com.example.kspot.auth.jwt.controller;
 
 import com.example.kspot.auth.jwt.JwtProvider;
-import com.example.kspot.global.dto.ApiResponseDto;
 import com.example.kspot.email.dto.ResetPasswordDto;
 import com.example.kspot.email.service.EmailVerificationService;
+import com.example.kspot.global.dto.ApiResponseDto;
 import com.example.kspot.users.dto.UserResetPwDto;
 import com.example.kspot.users.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,6 @@ public class PasswordResetController {
 
     private final UserService userService;
     private final EmailVerificationService emailVerificationService;
-    private final JwtProvider jwtProvider;
 
     @PatchMapping
     public ResponseEntity<ApiResponseDto<?>> resetPassword(@RequestBody UserResetPwDto dto) {
