@@ -1,5 +1,6 @@
 package com.example.kspot.exception;
 
+import com.example.kspot.external.tmdb.exception.CsvParsingException;
 import com.example.kspot.global.dto.ApiResponseDto;
 import com.example.kspot.email.exception.ExpiredTokenException;
 import com.example.kspot.email.exception.TokenAlreadyUsedException;
@@ -70,6 +71,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotFoundUserException.class)
     public ResponseEntity<String> handleNotFoundUser(NotFoundUserException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage()); //404
+    }
+
+    // CSV 파일 파싱 중 오류 발생
+    @ExceptionHandler(CsvParsingException.class)
+    public ResponseEntity<String> handleCsvParsingException(CsvParsingException e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
     }
 
     //런타임 예외 처리
