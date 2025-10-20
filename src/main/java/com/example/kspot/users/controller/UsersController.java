@@ -169,7 +169,7 @@ public class UsersController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletRequest httpRequest) {
+    public ResponseEntity<ApiResponseDto<?>> logout(HttpServletRequest httpRequest) {
 
         String accessTokenFromRequest = jwtProvider.extractTokenFromRequest(httpRequest);
         Long userId = jwtProvider.validateToken(accessTokenFromRequest);
@@ -192,10 +192,12 @@ public class UsersController {
                 .maxAge(0)
                 .build();
 
-
         userService.logout(userId);
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, accessToken.toString())
+                .header(HttpHeaders.SET_COOKIE, refreshToken.toString())
+                .body(new ApiResponseDto<>(200, "로그아웃 성공", null));
     }
 
     @GetMapping("/status")
