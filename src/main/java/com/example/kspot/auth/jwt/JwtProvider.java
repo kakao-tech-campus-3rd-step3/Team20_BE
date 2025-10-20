@@ -59,6 +59,29 @@ public class JwtProvider {
         }
     }
 
+    public String extractTokenFromRequest(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new TokenNotFoundException("Authorization header is invalid");
+        }
+
+        return authHeader.substring(7);
+    }
+
+    public Instant getExpiration(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .verifyWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+
+            return claims.getExpiration().toInstant();
+        } catch (Exception e) {
+            throw new RuntimeException("토큰 유효성 검사 실패");
+        }
+    }
+
     public Long extractUserIdFromRequest(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -72,4 +95,8 @@ public class JwtProvider {
             throw new TokenNotFoundException("Invalid JWT token");
         }
     }
+
+
+
+
 }

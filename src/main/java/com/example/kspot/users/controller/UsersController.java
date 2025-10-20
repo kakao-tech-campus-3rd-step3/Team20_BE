@@ -21,6 +21,9 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
+import java.util.Date;
+
 @Tag(name="Users", description = "사용자 관련 API(회원가입, 로그인, 회원관리)")
 @RestController
 @RequiredArgsConstructor
@@ -161,6 +164,42 @@ public class UsersController {
 
         return ResponseEntity.ok(new ApiResponseDto<>(200,"마이페이지를 로드하는데 성공했습니다",data));
 
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletRequest httpRequest) {
+        Long userId = jwtProvider.extractUserIdFromRequest(httpRequest);
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        userService.logout(userId);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/status")
+    public ResponseEntity<ApiResponseDto<?>> getStatus(HttpServletRequest httpRequest) {
+        String accessToken = jwtProvider.extractTokenFromRequest(httpRequest);
+        var dto = new UserStatusResponseDto(userService.getStatus(accessToken));
+        return ResponseEntity.ok(new ApiResponseDto<>(200 , "로그인 상태 확인" , dto));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResponseDto<?>> refresh(HttpServletRequest httpRequest) {
+        String refreshToken = jwtProvider.extractTokenFromRequest(httpRequest);
+
+        ResponseCookie accessToken = ResponseCookie.from("__Host-access_token", userService.getRefreshToken(refreshToken))
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .sameSite("Strict")
+                .maxAge(accessTtl)
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .header(HttpHeaders.SET_COOKIE, String.valueOf(accessToken))
+                .body(new ApiResponseDto<>(200 , "accessToken 재발급" , null ));
     }
 
 }

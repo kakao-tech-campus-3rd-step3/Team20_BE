@@ -7,12 +7,14 @@ import com.example.kspot.users.dto.*;
 import com.example.kspot.users.entity.Users;
 import com.example.kspot.users.exception.DuplicateNicknameException;
 import com.example.kspot.users.exception.NotEmailVerifiedException;
+import com.example.kspot.users.exception.NotFoundUserException;
 import com.example.kspot.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -83,7 +85,7 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
-    public UserResponseDto login(UserRequestDto userRequestDto){
+    public UserTokenResponseDto login(UserRequestDto userRequestDto){
 
         Users user = userRepository.findUsersByEmail(userRequestDto.email()).orElseThrow(
                 () -> new BadCredentialsException("이메일이 일치하지 않습니다")
@@ -100,7 +102,14 @@ public class UserService {
         String accessToken = jwtProvider.generateAccessToken(user);
         String refreshToken = jwtProvider.generateRefreshToken(user);
 
-        return new UserResponseDto(accessToken , refreshToken);
+        return new UserTokenResponseDto(accessToken , refreshToken);
+    }
+
+    @Transactional
+    public void logout(Long userId) {
+        Users user = userRepository.findById(userId).orElse(null);
+        user.setRefreshToken(null);
+        userRepository.save(user);
     }
 
     @Transactional
@@ -116,6 +125,21 @@ public class UserService {
         user.get().setPassword(encodedPw);
         user.get().setEmailVerified(true);
         userRepository.save(user.get());
+
+    }
+
+    public boolean getStatus(String accessToken) {
+
+        Long userId = jwtProvider.validateToken(accessToken);
+        return userId != null;
+    }
+
+    public String getRefreshToken(String refreshToken) {
+        Long userId = jwtProvider.validateToken(refreshToken);
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundUserException());
+
+        return jwtProvider.generateAccessToken(user);
 
     }
 
