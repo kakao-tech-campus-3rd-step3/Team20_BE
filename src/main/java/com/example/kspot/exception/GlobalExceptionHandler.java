@@ -48,7 +48,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(TokenNotFoundException.class)
     public ResponseEntity<ApiResponseDto<Void>> handleTokenNotFound(TokenNotFoundException e) {
         ApiResponseDto<Void> response = new ApiResponseDto<>(401, e.getMessage(), null);
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response); //401
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response); //401
     }
 
     @ExceptionHandler(ExpiredTokenException.class)
