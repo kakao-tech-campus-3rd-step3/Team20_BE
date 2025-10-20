@@ -27,9 +27,7 @@ public class JwtProvider {
     private static final String[] COOKIE_NAMES = {
             "__Host-access_token",
             "__Host-refresh_token",
-            "ACCESS_TOKEN",
             "access_token",
-            "REFRESH_TOKEN",
             "refresh_token"
     };
 
