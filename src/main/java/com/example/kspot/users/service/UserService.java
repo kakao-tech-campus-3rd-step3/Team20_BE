@@ -6,6 +6,7 @@ import com.example.kspot.auth.jwt.JwtProvider;
 import com.example.kspot.users.dto.*;
 import com.example.kspot.users.entity.Users;
 import com.example.kspot.users.exception.DuplicateNicknameException;
+import com.example.kspot.users.exception.DuplicateRegisterException;
 import com.example.kspot.users.exception.NotEmailVerifiedException;
 import com.example.kspot.users.exception.NotFoundUserException;
 import com.example.kspot.users.repository.UserRepository;
@@ -42,6 +43,11 @@ public class UserService {
 
         //이미 db에 이메일이 있을 경우 해당 이메일로 인증 전송
         Optional<Users> opt = userRepository.findUsersByEmail(user.email());
+
+        if(opt.isPresent() && opt.get().isEmailVerified()){
+            throw new DuplicateRegisterException();
+        }
+
         if (opt.isPresent()) {
             Users existing = opt.get();
             existing.setPassword(securityConfig.encodePassword(user.password()));
