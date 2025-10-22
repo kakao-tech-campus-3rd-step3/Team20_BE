@@ -134,7 +134,7 @@ public class UsersController {
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
-                .sameSite("Strict")
+                .sameSite("None")
                 .maxAge(refreshTtl)
                 .build();
 
@@ -142,7 +142,7 @@ public class UsersController {
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
-                .sameSite("Strict")
+                .sameSite("None")
                 .maxAge(accessTtl)
                 .build();
 
@@ -180,7 +180,7 @@ public class UsersController {
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
-                .sameSite("Strict")
+                .sameSite("None")
                 .maxAge(0)
                 .build();
 
@@ -188,7 +188,7 @@ public class UsersController {
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
-                .sameSite("Strict")
+                .sameSite("None")
                 .maxAge(0)
                 .build();
 
@@ -215,7 +215,7 @@ public class UsersController {
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
-                .sameSite("Strict")
+                .sameSite("None")
                 .maxAge(accessTtl)
                 .build();
 
