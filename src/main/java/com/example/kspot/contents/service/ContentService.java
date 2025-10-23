@@ -41,7 +41,15 @@ public class ContentService {
 
   // title로 컨텐츠 목록 조회
   public Page<Content> searchContentByTitle(String keyword, Pageable pageable) {
-    return contentRepository.findByTitleContainingIgnoreCase(keyword, pageable);
+    // 검색어 전처리: 기호/공백 제거 + 소문자화
+    String normalizedKeyword = normalize(keyword);
+
+    // 기본 포함 검색 시도
+    Page<Content> result = contentRepository.findByTitleContainingIgnoreCase(keyword, pageable);
+    if (!result.isEmpty()) return result;
+
+    // 연관 검색 (띄어쓰기, 콜론, 영어 대문자 등 무시 + Alias 테이블까지 조회)
+    return contentRepository.findByTitleOrAlias(normalizedKeyword, pageable);
   }
 
   public List<ContentLocationResponse> getRelatedLocations(Long contentId) {
@@ -69,5 +77,12 @@ public class ContentService {
         c.getTitle(),
         c.getPoster_image_url()
     ));
+  }
+
+  private String normalize(String input) {
+    if (input == null) return "";
+    return input
+        .replaceAll("[^\\p{IsAlphabetic}\\p{IsDigit}]", "") // 문자, 숫자만 남김
+        .toLowerCase(); // 대소문자 무시
   }
 }
