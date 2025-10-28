@@ -52,6 +52,18 @@ public class LocationRestController {
     return ResponseEntity.ok(response);
   }
 
+  @Operation(
+      summary = "위경도 인근 촬영지 조회",
+      description = "위도, 경도를 이용해 근처의 촬영지 정보를 조회합니다."
+  )
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", ref = "#/components/responses/Ok",
+          content = @Content(mediaType = "application/json", schema = @Schema(implementation = LocationResponse.class))),
+      @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
+      @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
+      @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound"),
+      @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError")
+  })
   @GetMapping("/nearby")
   public ResponseEntity<List<LocationResponse>> searchNearby(@RequestBody LocationRequest request) {
     List<LocationResponse> results = locationService.searchNearby(request);
