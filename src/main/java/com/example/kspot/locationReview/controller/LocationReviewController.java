@@ -38,7 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Tag(name = "location_review", description = "장소 관련 리뷰 API")
-@RequestMapping("/location_review")
+@RequestMapping("/api/location_review")
 @Slf4j
 public class LocationReviewController {
 

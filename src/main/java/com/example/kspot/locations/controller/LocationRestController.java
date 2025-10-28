@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "Locations", description = "촬영지 관련 API")
 @RestController
-@RequestMapping("/locations")
+@RequestMapping("/api/locations")
 public class LocationRestController {
 
     private final LocationService locationService;

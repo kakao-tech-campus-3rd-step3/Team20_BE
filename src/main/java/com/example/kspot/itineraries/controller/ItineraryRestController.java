@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "Itinerary", description = "여행 일정 관련 API")
 @RestController
-@RequestMapping("/itineraries")
+@RequestMapping("/api/itineraries")
 public class ItineraryRestController {
 
   private final ItineraryService itineraryService;

@@ -127,7 +127,6 @@ public class UsersController {
     })
     @PostMapping("/login")
     public ResponseEntity<ApiResponseDto<?>> login(@RequestBody UserRequestDto dto) {
-
         var token = userService.login(dto);
 
         ResponseCookie refreshToken = ResponseCookie.from("__Host-refresh_token", token.refreshToken())
