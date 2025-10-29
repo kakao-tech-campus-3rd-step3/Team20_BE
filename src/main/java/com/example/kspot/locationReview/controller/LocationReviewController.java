@@ -138,7 +138,8 @@ public class LocationReviewController {
       @RequestBody CreateLocationReviewRequest request,
       HttpServletRequest httpRequest
   ) {
-    Long userId = jwtProvider.extractUserIdFromRequest(httpRequest);
+    String token = jwtProvider.extractTokenFromRequest(httpRequest);
+    Long userId = jwtProvider.validateToken(token);
 
     LocationReviewDto response = LocationReviewDto.fromEntity(
         locationReviewService.createReview(request, userId));
@@ -164,7 +165,10 @@ public class LocationReviewController {
       @RequestBody CreateLocationReviewRequest request,
       HttpServletRequest httpRequest
   ) {
-    Long userId = jwtProvider.extractUserIdFromRequest(httpRequest);
+
+    String token = jwtProvider.extractTokenFromRequest(httpRequest);
+    Long userId = jwtProvider.validateToken(token);
+
     log.info("userId = " + userId);
     LocationReviewDto response = LocationReviewDto.fromEntity(
         locationReviewService.updateReview(userId, locationReviewId, request));
@@ -185,7 +189,10 @@ public class LocationReviewController {
   public ResponseEntity<ApiResponseDto<LocationReviewDto>> deleteLoctionReview(
       @PathVariable Long locationReviewId,
       HttpServletRequest httpRequest) {
-    Long userId = jwtProvider.extractUserIdFromRequest(httpRequest);
+
+    String token = jwtProvider.extractTokenFromRequest(httpRequest);
+    Long userId = jwtProvider.validateToken(token);
+
     if (userId == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
           .body(new ApiResponseDto<>(401, "JWT 토큰이 유효하지 않습니다", null));
