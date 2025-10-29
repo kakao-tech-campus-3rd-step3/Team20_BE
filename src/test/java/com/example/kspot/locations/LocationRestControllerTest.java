@@ -1,7 +1,9 @@
 package com.example.kspot.locations;
 
+import com.example.kspot.locations.dto.LocationRequest;
 import com.example.kspot.locations.entity.Location;
 import com.example.kspot.locations.repository.LocationRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,8 @@ class LocationRestControllerTest {
     private LocationRepository locationRepository;
 
     private Location saved;
+  @Autowired
+  private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
@@ -43,7 +47,7 @@ class LocationRestControllerTest {
     @Test
     void 장소조회_성공() throws Exception {
         // When: 해당 id로 GET 요청
-        mockMvc.perform(get("/locations/{id}", saved.getLocationId())
+        mockMvc.perform(get("/api/locations/{id}", saved.getLocationId())
                         .accept(MediaType.APPLICATION_JSON))
 
                 // Then: 200 응답 + 필드 값 검증
@@ -59,10 +63,28 @@ class LocationRestControllerTest {
     @Test
     void 장소조회_존재하지않음_404() throws Exception {
         // When: 존재하지 않는 id로 GET 요청
-        mockMvc.perform(get("/locations/{id}", 9999L)
+        mockMvc.perform(get("/api/locations/{id}", 9999L)
                         .accept(MediaType.APPLICATION_JSON))
 
                 // Then: 404 응답 + status 필드 확인
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void 인근장소조회_200() throws Exception {
+
+        LocationRequest request = new LocationRequest(37.5258, 126.9285);
+
+        // When: 위도 경도로 입력
+        mockMvc.perform(get("/api/locations/nearby")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].locationId").exists())
+            .andExpect(jsonPath("$[0].name").exists())
+            .andExpect(jsonPath("$[0].address").exists())
+            .andExpect(jsonPath("$[0].latitude").value(37.5258))
+            .andExpect(jsonPath("$[0].longitude").value(126.9285))
+            .andExpect(jsonPath("$[0].relatedContents").isArray());
     }
 }
