@@ -3,6 +3,7 @@ package com.example.kspot.users.dto;
 import java.time.Instant;
 
 public record UserStatusResponseDto(
-        boolean isLoggedIn
+        boolean isLoggedIn,
+        Long userId
 ) {
 }
