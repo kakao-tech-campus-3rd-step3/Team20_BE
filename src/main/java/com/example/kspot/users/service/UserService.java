@@ -139,9 +139,9 @@ public class UserService {
 
     }
 
-    public UserStatusResponseDto getStatus(String accessToken) {
+    public UserStatusResponseDto getStatus(String refreshToken) {
 
-        Long userId = jwtProvider.validateToken(accessToken);
+        Long userId = jwtProvider.validateToken(refreshToken);
         return new UserStatusResponseDto( userId != null, userId );
     }
 

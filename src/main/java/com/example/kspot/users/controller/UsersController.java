@@ -201,8 +201,8 @@ public class UsersController {
 
     @GetMapping("/status")
     public ResponseEntity<ApiResponseDto<?>> getStatus(HttpServletRequest httpRequest) {
-        String accessToken = jwtProvider.extractTokenFromRequest(httpRequest);
-        var dto = userService.getStatus(accessToken);
+        String refreshToken = jwtProvider.extractTokenFromRequest(httpRequest);
+        var dto = userService.getStatus(refreshToken);
         return ResponseEntity.ok(new ApiResponseDto<>(200 , "로그인 상태 확인" , dto));
     }
 
