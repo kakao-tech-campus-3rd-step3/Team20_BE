@@ -29,6 +29,8 @@ public class Location {
 
     private Double longitude;
 
+    private String description;
+
     @Column(name = "google_place_id", unique = true)
     private String googlePlaceId;
 
