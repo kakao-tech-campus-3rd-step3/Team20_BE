@@ -18,28 +18,36 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-@Entity
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
+@NoArgsConstructor
+@Entity
 @Table(name = "locations")
 public class Location {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long locationId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long locationId;
 
-  private String name;
-  private String address;
-  private Double latitude;
-  private Double longitude;
+    private String name;
 
-  @CreationTimestamp
-  @Column(updatable = false)
-  private LocalDateTime createdAt;
+    private String address;
 
-  @UpdateTimestamp
-  private LocalDateTime updatedAt;
+    private Double latitude;
 
-  @OneToMany(mappedBy = "location", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<ContentLocation> contentLocations = new ArrayList<>();
+    private Double longitude;
+
+    private String description;
+
+    @Column(name = "google_place_id", unique = true)
+    private String googlePlaceId;
+
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 }

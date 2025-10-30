@@ -4,12 +4,14 @@ import com.example.kspot.locations.entity.Location;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface LocationRepository extends JpaRepository<Location, Long> {
     Optional<Location> findByName(String name);
+    List<Location> findTop5ByGooglePlaceIdIsNull();
 
     @Query("""
         SELECT l FROM Location l
