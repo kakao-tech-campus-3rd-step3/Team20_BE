@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "Itinerary", description = "여행 일정 관련 API")
 @RestController
-@RequestMapping("/itineraries")
+@RequestMapping("/api/itineraries")
 public class ItineraryRestController {
 
   private final ItineraryService itineraryService;
@@ -96,7 +96,9 @@ public class ItineraryRestController {
       @RequestBody CreateItineraryRequest request,
       HttpServletRequest httpRequest
   ) {
-    Long userId = jwtProvider.extractUserIdFromRequest(httpRequest);
+
+    String token = jwtProvider.extractTokenFromRequest(httpRequest);
+    Long userId = jwtProvider.validateToken(token);
 
     ItineraryResponseDto response = itineraryService.createItinerary(request, userId);
     return ResponseEntity.status(HttpStatus.CREATED).body(
@@ -118,7 +120,10 @@ public class ItineraryRestController {
       @RequestBody CreateItineraryRequest request,
       HttpServletRequest httpRequest
   ) {
-    Long userId = jwtProvider.extractUserIdFromRequest(httpRequest);
+
+    String token = jwtProvider.extractTokenFromRequest(httpRequest);
+    Long userId = jwtProvider.validateToken(token);
+
     if (userId == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
           .body(new ApiResponseDto<>(401, "JWT 토큰이 유효하지 않습니다", null));
@@ -141,7 +146,10 @@ public class ItineraryRestController {
       @PathVariable Long itineraryId,
       HttpServletRequest httpRequest
   ) {
-    Long userId = jwtProvider.extractUserIdFromRequest(httpRequest);
+
+    String token = jwtProvider.extractTokenFromRequest(httpRequest);
+    Long userId = jwtProvider.validateToken(token);
+
     if (userId == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
           .body(new ApiResponseDto<>(401, "JWT 토큰이 유효하지 않습니다", null));

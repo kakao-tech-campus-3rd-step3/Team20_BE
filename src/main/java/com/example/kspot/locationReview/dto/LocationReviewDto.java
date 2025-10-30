@@ -15,6 +15,7 @@ public class LocationReviewDto {
   private Long locationId;
   private Long userId;
   private String title;
+  private String detail;
   private Integer rating;
 
   public static LocationReviewDto fromEntity(LocationReview entity){
@@ -23,6 +24,7 @@ public class LocationReviewDto {
         entity.getLocationId(),
         entity.getUserId(),
         entity.getTitle(),
+        entity.getDetail(),
         entity.getRating());
   }
 }

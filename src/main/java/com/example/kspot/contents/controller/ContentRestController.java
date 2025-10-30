@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name="Contents", description = "콘텐츠 관련 API")
 @RestController
-@RequestMapping("/contents")
+@RequestMapping("/api/contents")
 public class ContentRestController {
   private final ContentService contentService;
 

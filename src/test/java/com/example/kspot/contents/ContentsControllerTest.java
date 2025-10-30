@@ -87,9 +87,9 @@ public class ContentsControllerTest {
   }
 
   @Test
-  @DisplayName("5. id를 사용한 관련 location 조회 성공-7")
+  @DisplayName("5. id를 사용한 관련 location 조회 성공-333")
   void getContentByLocation_success() throws Exception {
-    mockMvc.perform(get("/contents/{id}/related-location", 7))
+    mockMvc.perform(get("/contents/{id}/related-location", 333))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.data").isArray())
         .andExpect(jsonPath("$.message").value("콘텐츠 관련 장소 조회 성공"))
@@ -103,6 +103,16 @@ public class ContentsControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.data").isEmpty())
         .andExpect(jsonPath("$.message").value("콘텐츠 관련 장소 조회 성공"))
+        .andExpect(jsonPath("$.status").value(200));
+  }
+
+  @Test
+  @DisplayName("7. title_alias를 사용한 content 조회 성공-케데헌")
+  void getContentByAlias_success() throws Exception {
+    mockMvc.perform(get("/contents/search?title={}", "케데헌"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.items").isArray())
+        .andExpect(jsonPath("$.message").value("연관 콘텐츠 조회 성공"))
         .andExpect(jsonPath("$.status").value(200));
   }
 }

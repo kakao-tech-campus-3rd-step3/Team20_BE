@@ -11,12 +11,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.kspot.locationReview.entity.LocationReview;
 import com.example.kspot.locationReview.repository.LocationReviewRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.Cookie;
 import jakarta.transaction.Transactional;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -38,12 +40,16 @@ class LocationReviewControllerTest {
 
   private Long existingReviewId;
   private Long existingLocationId;
-  private String jwtToken = "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIxIiwidHlwIjoibWFzdGVyIn0.3PZMoQI6OU7L-WBSB7S-tx2ZYJ_Jt37wN6PY3q64uOLbrO18Y_qHPir1dXkWvjE0";
+  private Cookie accessCookie;
+  private Cookie refreshCookie;
+
+  @Value("${master.jwt.key}")
+  private String jwtToken;
 
 
-  // ✅ BeforeEach: DB 확인 + 로그인
+  // ✅ BeforeEach: DB 확인 + 쿠키 설정
   @BeforeEach
-  void checkTableAndLogin() throws Exception {
+  void checkTable() throws Exception {
     // 1️⃣ LocationReview 테이블에 데이터가 존재하는지 확인
     Optional<LocationReview> existingReviewOpt = locationReviewRepository.findAll().stream()
         .findFirst();
@@ -54,13 +60,22 @@ class LocationReviewControllerTest {
     LocationReview existingReview = existingReviewOpt.get();
     existingReviewId = existingReview.getReviewId();
     existingLocationId = existingReview.getLocationId();
+
+    accessCookie = new Cookie("__Host-access_token", jwtToken);
+    refreshCookie = new Cookie("__Host-refresh_token", jwtToken);
+    accessCookie.setHttpOnly(true);
+    refreshCookie.setHttpOnly(true);
+    accessCookie.setSecure(true);
+    refreshCookie.setSecure(true);
+    accessCookie.setPath("/");
+    refreshCookie.setPath("/");
   }
 
   // ✅ 1. 특정 리뷰 조회 (성공)
   @Test
   @DisplayName("1. 특정 리뷰 조회 (성공)")
   void testGetReviewSuccess() throws Exception {
-    mockMvc.perform(get("/location_review/{reviewId}", existingReviewId))
+    mockMvc.perform(get("/api/location_review/{reviewId}", existingReviewId))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.data.reviewId").value(existingReviewId))
         .andExpect(jsonPath("$.status").value(200))
@@ -72,7 +87,7 @@ class LocationReviewControllerTest {
   @DisplayName("2. 특정 리뷰 조회 (실패)")
   void testGetReviewFail_NotFound() throws Exception {
     long reviewId = -872;
-    mockMvc.perform(get("/location_review/{reviewId}", reviewId))
+    mockMvc.perform(get("/api/location_review/{reviewId}", reviewId))
         .andExpect(status().isNotFound())
         .andExpect(jsonPath("$.data").doesNotExist())
         .andExpect(jsonPath("$.status").value(404))
@@ -83,7 +98,7 @@ class LocationReviewControllerTest {
   @Test
   @DisplayName("3. 장소 리뷰목록 조회 (성공)")
   void testGetLocationReviewListSuccess() throws Exception {
-    mockMvc.perform(get("/location_review/location/{locationId}", existingLocationId))
+    mockMvc.perform(get("/api/location_review/location/{locationId}", existingLocationId))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.status").value(200))
         .andExpect(jsonPath("$.message").value("리뷰 목록 조회 성공"))
@@ -95,7 +110,7 @@ class LocationReviewControllerTest {
   @DisplayName("4. 장소 리뷰목록 조회 (실패)")
   void testGetLocationReviewListFail() throws Exception {
     long locationId = -54;
-    mockMvc.perform(get("/location_review/location/{locationId}", locationId))
+    mockMvc.perform(get("/api/location_review/location/{locationId}", locationId))
         .andExpect(status().isNotFound())
         .andExpect(jsonPath("$.data").doesNotExist())
         .andExpect(jsonPath("$.status").value(404))
@@ -115,10 +130,11 @@ class LocationReviewControllerTest {
         }
         """.formatted(existingLocationId);
 
-    mockMvc.perform(post("/location_review")
-            .header("Authorization", "Bearer " + jwtToken)
+    mockMvc.perform(post("/api/location_review")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(createJson))
+            .content(createJson)
+            .cookie(accessCookie)
+            .cookie(refreshCookie))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.status").value(201))
         .andExpect(jsonPath("$.message").value("새로운 리뷰가 생성되었습니다"))
@@ -138,11 +154,11 @@ class LocationReviewControllerTest {
         }
         """.formatted(4);
 
-    mockMvc.perform(post("/location_review")
+    mockMvc.perform(post("/api/location_review")
             .contentType(MediaType.APPLICATION_JSON)
             .content(createJson))
-        .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.status").value(404))
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.status").value(401))
         .andExpect(jsonPath("$.message").value("일치하는 토큰이 존재하지 않습니다. tokenHashHex 값: Authorization header is invalid"));
   }
 
@@ -159,10 +175,11 @@ class LocationReviewControllerTest {
         }
         """.formatted(existingLocationId);
 
-    mockMvc.perform(put("/location_review/{reviewId}", 4)
-            .header("Authorization", "Bearer " + jwtToken)
+    mockMvc.perform(put("/api/location_review/{reviewId}", 4)
             .contentType(MediaType.APPLICATION_JSON)
-            .content(updateJson))
+            .content(updateJson)
+            .cookie(accessCookie)
+            .cookie(refreshCookie))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.status").value(200))
         .andExpect(jsonPath("$.message").value("리뷰가 업데이트 되었습니다"))
@@ -182,11 +199,11 @@ class LocationReviewControllerTest {
         }
         """.formatted(existingLocationId);
 
-    mockMvc.perform(put("/location_review/{reviewId}", existingReviewId)
+    mockMvc.perform(put("/api/location_review/{reviewId}", existingReviewId)
             .contentType(MediaType.APPLICATION_JSON)
             .content(updateJson))
-        .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.status").value(404))
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.status").value(401))
         .andExpect(jsonPath("$.message").value("일치하는 토큰이 존재하지 않습니다. tokenHashHex 값: Authorization header is invalid"));
   }
 
@@ -195,8 +212,9 @@ class LocationReviewControllerTest {
   @DisplayName("9. 리뷰 삭제 (성공)")
   void testDeleteReviewSuccess() throws Exception {
 
-    mockMvc.perform(delete("/location_review/{reviewId}", 4)
-            .header("Authorization", "Bearer " + jwtToken))
+    mockMvc.perform(delete("/api/location_review/{reviewId}", 4)
+            .cookie(accessCookie)
+            .cookie(refreshCookie))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.status").value(200))
         .andExpect(jsonPath("$.message").value("리뷰가 정상적으로 삭제되었습니다"));
@@ -206,9 +224,9 @@ class LocationReviewControllerTest {
   @Test
   @DisplayName("10. 리뷰 삭제 (실패 - JWT 없음)")
   void testDeleteReviewFail_Unauthorized() throws Exception {
-    mockMvc.perform(delete("/location_review/{reviewId}", 4))
-        .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.status").value(404))
+    mockMvc.perform(delete("/api/location_review/{reviewId}", 4))
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.status").value(401))
         .andExpect(jsonPath("$.message").value("일치하는 토큰이 존재하지 않습니다. tokenHashHex 값: Authorization header is invalid"));
   }
 }

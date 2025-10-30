@@ -66,4 +66,7 @@ public class Content {
   @OneToMany(mappedBy = "content", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<ContentLocation> contentLocations = new ArrayList<>();
 
+  // title_alias와 one to many 관계 맺도록 설정
+  @OneToMany(mappedBy = "content", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<TitleAlias> aliases = new ArrayList<>();
 }

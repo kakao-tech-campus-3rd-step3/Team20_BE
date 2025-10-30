@@ -127,14 +127,13 @@ public class UsersController {
     })
     @PostMapping("/login")
     public ResponseEntity<ApiResponseDto<?>> login(@RequestBody UserRequestDto dto) {
-
         var token = userService.login(dto);
 
         ResponseCookie refreshToken = ResponseCookie.from("__Host-refresh_token", token.refreshToken())
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
-                .sameSite("Strict")
+                .sameSite("None")
                 .maxAge(refreshTtl)
                 .build();
 
@@ -142,7 +141,7 @@ public class UsersController {
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
-                .sameSite("Strict")
+                .sameSite("None")
                 .maxAge(accessTtl)
                 .build();
 
@@ -150,7 +149,7 @@ public class UsersController {
                 .header(HttpHeaders.SET_COOKIE, accessToken.toString())
                 .header(HttpHeaders.SET_COOKIE, refreshToken.toString())
                 .body(new ApiResponseDto<>(200, "로그인 성공", token.accessToken()));
-    }
+    }   
 
     @GetMapping("/mypage")
     public ResponseEntity<ApiResponseDto<?>> getMyPage(HttpServletRequest httpRequest) {
@@ -180,7 +179,7 @@ public class UsersController {
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
-                .sameSite("Strict")
+                .sameSite("None")
                 .maxAge(0)
                 .build();
 
@@ -188,7 +187,7 @@ public class UsersController {
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
-                .sameSite("Strict")
+                .sameSite("None")
                 .maxAge(0)
                 .build();
 
@@ -202,8 +201,8 @@ public class UsersController {
 
     @GetMapping("/status")
     public ResponseEntity<ApiResponseDto<?>> getStatus(HttpServletRequest httpRequest) {
-        String accessToken = jwtProvider.extractTokenFromRequest(httpRequest);
-        var dto = new UserStatusResponseDto(userService.getStatus(accessToken));
+        String refreshToken = jwtProvider.extractTokenFromRequest(httpRequest);
+        var dto = userService.getStatus(refreshToken);
         return ResponseEntity.ok(new ApiResponseDto<>(200 , "로그인 상태 확인" , dto));
     }
 
@@ -215,7 +214,7 @@ public class UsersController {
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
-                .sameSite("Strict")
+                .sameSite("None")
                 .maxAge(accessTtl)
                 .build();
 
