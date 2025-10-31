@@ -31,13 +31,23 @@ public class LocationService {
                 .map(LocationImage::getImageUrl)
                 .collect(Collectors.toList());
 
+        List<LocationResponse.RelatedContent> relatedContents =
+                location.getContentLocations().stream()
+                        .filter(cl -> cl.getContent() != null)
+                        .map(cl -> new LocationResponse.RelatedContent(
+                                cl.getContent().getContent_id(),
+                                cl.getContent().getTitle(),
+                                cl.getContent().getCategory()
+                        ))
+                        .toList();
+
         return new LocationResponse(
                 location.getLocationId(),
                 location.getName(),
                 location.getAddress(),
                 location.getLatitude(),
                 location.getLongitude(),
-                List.of(),
+                relatedContents,
                 location.getDescription(),
                 imageUrls
         );
@@ -55,20 +65,28 @@ public class LocationService {
             .findByLatitudeAndLongitudeRange(minLat, maxLat, minLon, maxLon);
 
         return locations.stream()
-            .map(l -> new LocationResponse(
-                l.getLocationId(),
-                l.getName(),
-                l.getAddress(),
-                l.getLatitude(),
-                l.getLongitude(),
-                l.getContentLocations().stream()
-                    .map(cl -> new LocationResponse.RelatedContent(
-                        cl.getContent().getContent_id(),
-                        cl.getContent().getTitle(),
-                        cl.getContent().getCategory()
-                    ))
-                    .toList()
-            ))
+            .map(l -> {
+                List<String> imageUrls = locationImageRepository.findByLocation_LocationId(l.getLocationId())
+                        .stream()
+                        .map(LocationImage::getImageUrl)
+                        .toList();
+                return new LocationResponse(
+                        l.getLocationId(),
+                        l.getName(),
+                        l.getAddress(),
+                        l.getLatitude(),
+                        l.getLongitude(),
+                        l.getContentLocations().stream()
+                                .map(cl -> new LocationResponse.RelatedContent(
+                                        cl.getContent().getContent_id(),
+                                        cl.getContent().getTitle(),
+                                        cl.getContent().getCategory()
+                                ))
+                                .toList(),
+                        l.getDescription(),
+                        imageUrls
+                );
+            })
             .toList();
     }
 }
