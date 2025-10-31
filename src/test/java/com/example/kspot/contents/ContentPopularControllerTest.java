@@ -59,7 +59,7 @@ public class ContentPopularControllerTest {
     @Test
     @DisplayName("1.전체 인기 콘텐츠 TOP10 조회 성공")
     void getPopularContentsTop10_allCategory() throws Exception {
-        mockMvc.perform(get("/contents/popular")
+        mockMvc.perform(get("/api/contents/popular")
                         .param("size", "10")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -74,7 +74,7 @@ public class ContentPopularControllerTest {
     @Test
     @DisplayName("2.카테고리별 인기 콘텐츠 조회 성공(drama)")
     void getPopularContents_drama() throws Exception {
-        mockMvc.perform(get("/contents/popular")
+        mockMvc.perform(get("/api/contents/popular")
                         .param("category", "DRAMA")
                         .param("page","0")
                         .param("size", "20")
@@ -92,7 +92,7 @@ public class ContentPopularControllerTest {
     @Test
     @DisplayName("3.존재하지 않는 카테고리 조회 시 빈 리스트 반환")
     void getPopularContents_invalidCategory() throws Exception{
-        mockMvc.perform(get("/contents/popular")
+        mockMvc.perform(get("/api/contents/popular")
                         .param("category", "KPOP")
                         .param("page", "0")
                         .param("size", "20")
