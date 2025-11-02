@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface LocationImageRepository extends JpaRepository<LocationImage, Long> {
     List<LocationImage> findByLocation_LocationId(Long locationId);
+    boolean existsByLocation_LocationId(Long locationId);
 }
