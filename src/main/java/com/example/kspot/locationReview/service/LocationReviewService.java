@@ -60,11 +60,7 @@ public class LocationReviewService {
 
   // LocationId를 통한 장소에 대한 리뷰목록 조회
   public Page<LocationReview> findByLocationIdOrThrow(Long locationId, Pageable pageable) {
-    Page<LocationReview> reviews = locationReviewRepository.findByLocationId(locationId, pageable);
-    if (reviews.isEmpty()) {
-      throw new LocationReviewNotFoundException(locationId);
-    }
-    return reviews;
+    return locationReviewRepository.findByLocationId(locationId, pageable);
   }
 
   // userID + ReviewId를 통한 리뷰 수정
