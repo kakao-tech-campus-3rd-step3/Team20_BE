@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface LocationRepository extends JpaRepository<Location, Long> {
     Optional<Location> findByName(String name);
-    List<Location> findTop5ByGooglePlaceIdIsNull();
+    List<Location> findTop500ByGooglePlaceIdIsNull();
 
     @Query("""
         SELECT l FROM Location l

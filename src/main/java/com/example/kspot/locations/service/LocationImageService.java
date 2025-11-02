@@ -17,8 +17,10 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class LocationImageService {
@@ -75,48 +77,70 @@ public class LocationImageService {
             locationRepository.save(location);
             logger.info("Saved google_place_id={} for '{}'", place.getId(), location.getName());
 
-            // 사진 정보 저장 (최대 3장)
+            // 사진 정보 저장 (가로 이미지 1장 선별)
             if (place.getPhotos() != null && !place.getPhotos().isEmpty()) {
-                for (int i = 0; i < Math.min(place.getPhotos().size(), 3); i++) {
-                    Photo photo = place.getPhotos().get(i);
-                    String photoName = photo.getName();
+                List<Photo> photos = place.getPhotos();
 
-                    String mediaUrl = String.format(
-                            "https://places.googleapis.com/v1/%s/media?maxHeightPx=1600&skipHttpRedirect=true&key=%s",
-                            photoName, googleApiKey
-                    );
+                //비율 1.45~1.85 범위 내 사진
+                Photo selectedPhoto = photos.stream()
+                        .filter(p -> {
+                            double ratio = (double) p.getWidthPx() / p.getHeightPx();
+                            return ratio >= 1.45 && ratio <= 1.85;
+                        })
+                        .findFirst()
+                        .orElse(null);
 
-                    try {
-                        HttpHeaders mediaHeaders = new HttpHeaders();
-                        mediaHeaders.set("X-Goog-Api-Key", googleApiKey);
-                        mediaHeaders.set("Accept", "application/json");
-                        HttpEntity<Void> mediaRequest = new HttpEntity<>(mediaHeaders);
-
-                        // photoUri JSON 응답 파싱
-                        ResponseEntity<Map> mediaResponse =
-                                restTemplate.exchange(mediaUrl, HttpMethod.GET, mediaRequest, Map.class);
-
-                        if (mediaResponse.getStatusCode() == HttpStatus.OK && mediaResponse.getBody() != null) {
-                            Object uriObj = mediaResponse.getBody().get("photoUri");
-                            if (uriObj != null) {
-                                String photoUri = uriObj.toString();
-
-                                LocationImage image = new LocationImage();
-                                image.setLocation(location);
-                                image.setImageUrl(photoUri);
-                                image.setCreatedAt(LocalDateTime.now());
-                                locationImageRepository.save(image);
-
-                                logger.info("Saved photo URL for '{}': {}", location.getName(), photoUri);
-                            }
-                        } else {
-                            logger.warn("No photoUri in response for '{}'", photoName);
-                        }
-
-                    } catch (Exception e) {
-                        logger.warn("Photo API failed for '{}': {}", photoName, e.getMessage());
-                    }
+                // 없으면 가로가 더 긴 이미지 중 가장 비율 큰 사진
+                if (selectedPhoto == null) {
+                    selectedPhoto = photos.stream()
+                            .filter(p -> p.getWidthPx() > p.getHeightPx())
+                            .max(Comparator.comparingDouble(p -> (double) p.getWidthPx() / p.getHeightPx()))
+                            .orElse(null);
                 }
+
+                //여전히 없으면 NULL 이미지 등록
+                if (selectedPhoto == null) {
+                    logger.info("No suitable photo found for '{}'", location.getName());
+                    insertNullImage(location);
+                    return;
+                }
+
+                //선택된 사진으로 Google Media API 호출
+                String mediaUrl = String.format(
+                        "https://places.googleapis.com/v1/%s/media?maxHeightPx=1600&skipHttpRedirect=true&key=%s",
+                        selectedPhoto.getName(), googleApiKey
+                );
+
+                try {
+                    HttpHeaders mediaHeaders = new HttpHeaders();
+                    mediaHeaders.set("X-Goog-Api-Key", googleApiKey);
+                    mediaHeaders.set("Accept", "application/json");
+                    HttpEntity<Void> mediaRequest = new HttpEntity<>(mediaHeaders);
+
+                    ResponseEntity<Map> mediaResponse =
+                            restTemplate.exchange(mediaUrl, HttpMethod.GET, mediaRequest, Map.class);
+
+                    if (mediaResponse.getStatusCode() == HttpStatus.OK && mediaResponse.getBody() != null) {
+                        Object uriObj = mediaResponse.getBody().get("photoUri");
+                        String photoUri = (uriObj != null) ? uriObj.toString() : null;
+
+                        LocationImage image = new LocationImage();
+                        image.setLocation(location);
+                        image.setImageUrl(photoUri);
+                        image.setCreatedAt(LocalDateTime.now());
+                        locationImageRepository.save(image);
+
+                        logger.info("Saved photo for '{}': {}", location.getName(),
+                                (photoUri != null ? photoUri : "NULL"));
+                    } else {
+                        insertNullImage(location);
+                    }
+                } catch (RestClientException e) {
+                    logger.warn("Photo API failed for '{}': {}", selectedPhoto.getName(), e.getMessage());
+                    insertNullImage(location);
+                }
+            } else {
+                insertNullImage(location);
             }
 
         } catch (RestClientException e) {
@@ -126,20 +150,25 @@ public class LocationImageService {
         }
     }
 
+    private void insertNullImage(Location location){
+        LocationImage nullImage = new LocationImage();
+        nullImage.setLocation(location);
+        nullImage.setImageUrl(null);
+        nullImage.setCreatedAt(LocalDateTime.now());
+        locationImageRepository.save(nullImage);
+        logger.info("Inserted NULL image row for '{}'", location.getName());
+    }
 
-    /**
-     * 테스트용 - 상위 5개 장소 이미지 업데이트
-     */
-    public void testUpdateFiveLocations() {
-        List<Location> locations = locationRepository.findTop5ByGooglePlaceIdIsNull();
-        logger.info("Google Places API v1 test started ({} locations)", locations.size());
+    // 500개 단위로 이미지 url 업데이트
+    public void updateImagesForEmptyLocations(){
+        List<Location> batch = locationRepository.findTop500ByGooglePlaceIdIsNull();
+        logger.info("Updating images for '{}'", batch.size());
 
-        for (Location loc : locations) {
+        for (Location loc : batch) {
             updateFromGoogleTextSearch(loc);
-            try {
-                Thread.sleep(500); // rate limit 방지
-            } catch (InterruptedException ignored) {
-            }
+            try{
+                Thread.sleep(500);
+            }catch (InterruptedException e){}
         }
     }
 }
