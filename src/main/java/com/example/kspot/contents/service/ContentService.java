@@ -41,15 +41,20 @@ public class ContentService {
 
   // title로 컨텐츠 목록 조회
   public Page<Content> searchContentByTitle(String keyword, Pageable pageable) {
-    // 검색어 전처리: 기호/공백 제거 + 소문자화
+    // 검색어 정규화
     String normalizedKeyword = normalize(keyword);
 
-    // 기본 포함 검색 시도
-    Page<Content> result = contentRepository.findByTitleContainingIgnoreCase(keyword, pageable);
-    if (!result.isEmpty()) return result;
+    // 공백이거나 null인 경우 -> fallback
+    if (!normalizedKeyword.isBlank()) {
+      // Full Text Search 시도
+      Page<Content> result = contentRepository.fullTextSearch(normalizedKeyword + "*", pageable);
+      if (!result.isEmpty()) {
+        return result;
+      }
+    }
 
-    // 연관 검색 (띄어쓰기, 콜론, 영어 대문자 등 무시 + Alias 테이블까지 조회)
-    return contentRepository.findByTitleOrAlias(normalizedKeyword, pageable);
+    // fallback
+    return contentRepository.findByTitleContainingIgnoreCase(keyword, pageable);
   }
 
   public List<ContentLocationResponse> getRelatedLocations(Long contentId) {
@@ -61,7 +66,7 @@ public class ContentService {
 
   //인기순 조회 (전체 or 카테고리별)
 
-  public Page<ContentItemDto> getPopularContents(String category, int page, int size){
+  public Page<ContentItemDto> getPopularContents(String category, int page, int size) {
     Pageable pageable = PageRequest.of(page, size, Sort.by("popularity").descending());
 
     Page<Content> contents;
@@ -79,10 +84,7 @@ public class ContentService {
     ));
   }
 
-  private String normalize(String input) {
-    if (input == null) return "";
-    return input
-        .replaceAll("[^\\p{IsAlphabetic}\\p{IsDigit}]", "") // 문자, 숫자만 남김
-        .toLowerCase(); // 대소문자 무시
+  private String normalize(String keyword) {
+    return keyword.replaceAll("[^a-zA-Z0-9가-힣]", "").toLowerCase();
   }
 }
