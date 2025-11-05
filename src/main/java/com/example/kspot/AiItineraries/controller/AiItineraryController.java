@@ -42,7 +42,43 @@ public class AiItineraryController {
     // AI 여행 일정 저장
     @PostMapping
     public ResponseEntity<ApiResponseDto<AiItineraryResponse>> createAiItinerary(
-            @Parameter(description = "AI가 생성한 전체 JSON 데이터", required = true)
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "AI가 생성한 전체 여행 일정 JSON 데이터",
+                    required = true,
+                    content = @Content(
+                            schema = @Schema(
+                                    example = "{\n" +
+                                            "  \"data\": {\n" +
+                                            "    \"selected_contents\": [\n" +
+                                            "      {\"content_id\": 670, \"title\": \"올드보이\", \"category\": \"MOVIE\", \"locations_count\": 4},\n" +
+                                            "      {\"content_id\": 51608, \"title\": \"아저씨\", \"category\": \"MOVIE\", \"locations_count\": 3}\n" +
+                                            "    ],\n" +
+                                            "    \"itinerary\": {\n" +
+                                            "      \"day_1\": [\n" +
+                                            "        {\"time\": \"10:00\", \"location_name\": \"장성향\", \"content_title\": \"올드보이\", \"scene\": \"군만두 중국집\"},\n" +
+                                            "        {\"time\": \"13:00\", \"location_name\": \"초량 이바구길\", \"content_title\": \"아저씨\", \"scene\": \"원빈 출퇴근 골목\"}\n" +
+                                            "      ],\n" +
+                                            "      \"day_2\": [\n" +
+                                            "        {\"time\": \"09:00\", \"location_name\": \"부산 한성주택\", \"content_title\": \"쌈 마이웨이\", \"scene\": \"계단식 주택가\"}\n" +
+                                            "      ]\n" +
+                                            "    },\n" +
+                                            "    \"summary\": {\n" +
+                                            "      \"total_locations\": 11,\n" +
+                                            "      \"total_distance_km\": 25,\n" +
+                                            "      \"transportation\": \"대중교통, 택시\",\n" +
+                                            "      \"estimated_cost_per_person\": \"100,000원~150,000원\"\n" +
+                                            "    },\n" +
+                                            "    \"metadata\": {\n" +
+                                            "      \"departure\": {\"name\": \"인천국제공항\"},\n" +
+                                            "      \"arrival\": {\"name\": \"부산역\"},\n" +
+                                            "      \"duration\": \"1박2일\",\n" +
+                                            "      \"theme\": \"all\"\n" +
+                                            "    }\n" +
+                                            "  }\n" +
+                                            "}"
+                            )
+                    )
+            )
             @RequestBody Map<String, Object> body,
             @Parameter(hidden = true)
             HttpServletRequest request
