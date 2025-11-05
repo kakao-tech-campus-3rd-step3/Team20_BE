@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -22,9 +23,10 @@ public class AiItineraryService {
 
     //ai 생성 동선 저장
     public AiItineraryResponse save(Long userId, String startPoint, String endPoint,
-                                    String duration, String theme, String jsonData) {
+                                    String duration, String theme, Map<String, Object> jsonData) {
         Users user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
 
         AiItinerary itinerary = AiItinerary.builder()
                 .user(user)

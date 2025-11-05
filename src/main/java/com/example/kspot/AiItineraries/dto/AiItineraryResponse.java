@@ -3,6 +3,7 @@ package com.example.kspot.AiItineraries.dto;
 import com.example.kspot.AiItineraries.entity.AiItinerary;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 //상세 동선 조회용
 public record AiItineraryResponse(
@@ -11,7 +12,7 @@ public record AiItineraryResponse(
         String endPoint,
         String duration,
         String theme,
-        String data,
+        Map<String, Object> data,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {
