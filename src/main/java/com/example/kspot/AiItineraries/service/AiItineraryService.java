@@ -5,6 +5,7 @@ import com.example.kspot.AiItineraries.dto.AiItineraryResponse;
 import com.example.kspot.AiItineraries.entity.AiItinerary;
 import com.example.kspot.AiItineraries.repository.AiItineraryRepository;
 import com.example.kspot.users.entity.Users;
+import com.example.kspot.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,9 +18,14 @@ import java.util.List;
 public class AiItineraryService {
 
     private final AiItineraryRepository itineraryRepository;
+    private final UserRepository userRepository;
 
     //ai 생성 동선 저장
-    public AiItineraryResponse save(Users user, String startPoint, String endPoint, String duration, String theme, String jsonData) {
+    public AiItineraryResponse save(Long userId, String startPoint, String endPoint,
+                                    String duration, String theme, String jsonData) {
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
         AiItinerary itinerary = AiItinerary.builder()
                 .user(user)
                 .startPoint(startPoint)
