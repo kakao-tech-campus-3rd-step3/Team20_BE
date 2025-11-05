@@ -1,12 +1,15 @@
 package com.example.kspot.AiItineraries.entity;
 
 import com.example.kspot.users.entity.Users;
+import com.vladmihalcea.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Type;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Entity
 @Table(name = "ai_itineraries")
@@ -36,8 +39,9 @@ public class AiItinerary {
     @Column(length = 50)
     private String theme = "all";
 
-    @Column(columnDefinition = "JSON", nullable = false)
-    private String data;
+    @Type(JsonType.class)
+    @Column(columnDefinition = "json")
+    private Map<String, Object> data;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
