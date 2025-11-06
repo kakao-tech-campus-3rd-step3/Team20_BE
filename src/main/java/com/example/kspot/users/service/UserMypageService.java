@@ -1,7 +1,5 @@
 package com.example.kspot.users.service;
 
-import com.example.kspot.AiItineraries.dto.AiItineraryListResponse;
-import com.example.kspot.AiItineraries.service.AiItineraryService;
 import com.example.kspot.auth.jwt.JwtProvider;
 import com.example.kspot.itineraries.dto.ItineraryResponseDto;
 import com.example.kspot.itineraries.entity.Itinerary;
@@ -22,7 +20,6 @@ public class UserMypageService {
 
     private final UserRepository userRepository;
     private final ItineraryService itineraryService;
-    private final AiItineraryService aiItineraryService;
 
     public MypageResponseDto getMypage(Long userId){
 
@@ -30,9 +27,8 @@ public class UserMypageService {
                 () -> new NotFoundUserException()
         );
 
-        List<AiItineraryListResponse> aiList = aiItineraryService.getUserItineraries(userId , false);
         List<ItineraryResponseDto> list = itineraryService.getItinerariesByUserId(userId);
-        return new MypageResponseDto(user.getEmail() , user.getNickname(), aiList, list);
+        return new MypageResponseDto(user.getEmail() , user.getNickname(), list);
 
     }
 }
