@@ -41,13 +41,13 @@ public class ContentService {
 
   // title로 컨텐츠 목록 조회
   public Page<Content> searchContentByTitle(String keyword, Pageable pageable) {
-    // 검색어 정규화
     String normalizedKeyword = normalize(keyword);
 
-    // 공백이거나 null인 경우 -> fallback
     if (!normalizedKeyword.isBlank()) {
-      // Full Text Search 시도
-      Page<Content> result = contentRepository.fullTextSearch(normalizedKeyword + "*", pageable);
+      // 띄어쓰기 기준으로 단어 분리 → 각각 필수 포함(+)
+      String booleanQuery = "+" + normalizedKeyword.replaceAll("\\s+", " +") + "*";
+
+      Page<Content> result = contentRepository.fullTextSearch(booleanQuery, pageable);
       if (!result.isEmpty()) {
         return result;
       }
@@ -85,6 +85,6 @@ public class ContentService {
   }
 
   private String normalize(String keyword) {
-    return keyword.replaceAll("[^a-zA-Z0-9가-힣]", "").toLowerCase();
+    return keyword.replaceAll("[^a-zA-Z0-9가-힣\\s]", "").toLowerCase().trim();
   }
 }

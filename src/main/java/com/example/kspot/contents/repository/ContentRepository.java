@@ -15,21 +15,23 @@ public interface ContentRepository extends JpaRepository<Content, Long> {
 
   // Full Text Search (title, alias 둘 다 검색)
   @Query(value = """
-      SELECT DISTINCT c.*
-      FROM contents c
-      LEFT JOIN title_alias a ON a.content_id = c.content_id
-      WHERE MATCH(c.title) AGAINST(:keyword IN BOOLEAN MODE)
-         OR MATCH(a.alias) AGAINST(:keyword IN BOOLEAN MODE)
-      """,
+  SELECT DISTINCT c.*
+  FROM contents c
+  LEFT JOIN title_alias a ON a.content_id = c.content_id
+  WHERE MATCH(c.title) AGAINST(:keyword IN NATURAL LANGUAGE MODE)
+     OR MATCH(a.alias) AGAINST(:keyword IN NATURAL LANGUAGE MODE)
+  """,
       countQuery = """
-        SELECT COUNT(DISTINCT c.content_id)
-        FROM contents c
-        LEFT JOIN title_alias a ON a.content_id = c.content_id
-        WHERE MATCH(c.title) AGAINST(:keyword IN BOOLEAN MODE)
-           OR MATCH(a.alias) AGAINST(:keyword IN BOOLEAN MODE)
-        """,
+  SELECT COUNT(DISTINCT c.content_id)
+  FROM contents c
+  LEFT JOIN title_alias a ON a.content_id = c.content_id
+  WHERE MATCH(c.title) AGAINST(:keyword IN NATURAL LANGUAGE MODE)
+     OR MATCH(a.alias) AGAINST(:keyword IN NATURAL LANGUAGE MODE)
+  """,
       nativeQuery = true)
   Page<Content> fullTextSearch(@Param("keyword") String keyword, Pageable pageable);
+
+
 
 
 
