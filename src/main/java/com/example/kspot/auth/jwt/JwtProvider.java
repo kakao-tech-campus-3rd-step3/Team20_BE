@@ -22,6 +22,8 @@ public class JwtProvider {
   @Value("${jwt.refresh-ttl}")
   private long refreshTtl;
 
+  private static final String BEARER_PREFIX = "Bearer ";
+  private static final String AUTH_HEADER = "Authorization";
   private static final String[] COOKIE_NAMES = {
       "__Host-access_token",
       "__Host-refresh_token",
@@ -66,9 +68,9 @@ public class JwtProvider {
   }
 
   public String extractTokenFromRequest(HttpServletRequest request) {
-    String authHeader = request.getHeader("Authorization");
+    String authHeader = request.getHeader(AUTH_HEADER);
     if (authHeader != null && !authHeader.isBlank()) {
-      return authHeader.substring(7).trim();
+      return authHeader.substring(BEARER_PREFIX.length()).trim();
     }
 
     Cookie[] cookies = request.getCookies();
