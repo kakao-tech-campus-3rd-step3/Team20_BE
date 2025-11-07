@@ -20,7 +20,6 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class LocationImageService {
@@ -30,6 +29,9 @@ public class LocationImageService {
     private final LocationRepository locationRepository;
     private final LocationImageRepository locationImageRepository;
     private final RestTemplate restTemplate;
+
+    double MIN_HORIZONTAL_ASPECT_RATIO = 1.45;
+    double MAX_HORIZONTAL_ASPECT_RATIO = 1.85;
 
     @Value("${google.api.key}")
     private String googleApiKey;
@@ -85,7 +87,7 @@ public class LocationImageService {
                 Photo selectedPhoto = photos.stream()
                         .filter(p -> {
                             double ratio = (double) p.getWidthPx() / p.getHeightPx();
-                            return ratio >= 1.45 && ratio <= 1.85;
+                            return ratio >= MIN_HORIZONTAL_ASPECT_RATIO && ratio <= MAX_HORIZONTAL_ASPECT_RATIO;
                         })
                         .findFirst()
                         .orElse(null);
@@ -168,7 +170,9 @@ public class LocationImageService {
             updateFromGoogleTextSearch(loc);
             try{
                 Thread.sleep(500);
-            }catch (InterruptedException e){}
+            }catch (InterruptedException e){
+                Thread.currentThread().interrupt();
+            }
         }
     }
 }

@@ -32,6 +32,7 @@ public class AiItineraryController {
     private final JwtProvider jwtProvider;
     private final ObjectMapper objectMapper;
 
+    // AI 여행 일정 저장
     @Operation(summary = "AI 여행 일정 저장", description = "AI가 생성한 여행 일정을 저장합니다. JWT 인증 필요.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "AI 여행 일정 저장 성공",
@@ -39,7 +40,6 @@ public class AiItineraryController {
             @ApiResponse(responseCode = "401", description = "JWT 토큰이 유효하지 않습니다"),
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
-    // AI 여행 일정 저장
     @PostMapping
     public ResponseEntity<ApiResponseDto<AiItineraryResponse>> createAiItinerary(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -106,6 +106,7 @@ public class AiItineraryController {
                 .body(new ApiResponseDto<>(201, "AI 여행 일정이 성공적으로 저장되었습니다", response));
     }
 
+    // 유저별 AI 여행 일정 목록 조회
     @Operation(summary = "AI 여행 일정 목록 조회", description = "로그인한 사용자의 모든 AI 여행 일정을 조회합니다. JWT 인증 필요.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공",
@@ -113,7 +114,6 @@ public class AiItineraryController {
             @ApiResponse(responseCode = "401", description = "JWT 토큰이 유효하지 않습니다"),
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
-    // 유저별 AI 여행 일정 목록 조회
     @GetMapping("/user")
     public ResponseEntity<ApiResponseDto<List<AiItineraryListResponse>>> getUserItineraries(
             @Parameter(hidden = true) HttpServletRequest request,
@@ -132,6 +132,7 @@ public class AiItineraryController {
         return ResponseEntity.ok(new ApiResponseDto<>(200, "AI 여행 일정 목록 조회 성공", list));
     }
 
+    // AI 여행 일정 단건 조회
     @Operation(summary = "AI 여행 일정 단건 조회", description = "특정 AI 여행 일정의 상세 정보를 조회합니다. JWT 인증 필요.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공",
@@ -139,7 +140,6 @@ public class AiItineraryController {
             @ApiResponse(responseCode = "401", description = "JWT 토큰이 유효하지 않습니다"),
             @ApiResponse(responseCode = "404", description = "해당 일정을 찾을 수 없음")
     })
-    // AI 여행 일정 단건 조회
     @GetMapping("/{itineraryId}")
     public ResponseEntity<ApiResponseDto<AiItineraryResponse>> getItinerary(
             @Parameter(description = "조회할 일정의 ID", example = "1") @PathVariable Long itineraryId,
@@ -157,13 +157,13 @@ public class AiItineraryController {
         return ResponseEntity.ok(new ApiResponseDto<>(200, "AI 여행 일정 조회 성공", response));
     }
 
+    // AI 여행 일정 삭제
     @Operation(summary = "AI 여행 일정 삭제", description = "특정 AI 여행 일정을 삭제합니다. JWT 인증 필요.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "삭제 성공"),
             @ApiResponse(responseCode = "401", description = "JWT 토큰이 유효하지 않습니다"),
             @ApiResponse(responseCode = "404", description = "해당 일정을 찾을 수 없음")
     })
-    // AI 여행 일정 삭제
     @DeleteMapping("/{itineraryId}")
     public ResponseEntity<ApiResponseDto<Void>> deleteItinerary(
             @Parameter(description = "삭제할 일정의 ID", example = "1") @PathVariable Long itineraryId,
