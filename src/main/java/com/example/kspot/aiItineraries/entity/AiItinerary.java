@@ -1,4 +1,4 @@
-package com.example.kspot.AiItineraries.entity;
+package com.example.kspot.aiItineraries.entity;
 
 import com.example.kspot.users.entity.Users;
 import com.vladmihalcea.hibernate.type.json.JsonType;

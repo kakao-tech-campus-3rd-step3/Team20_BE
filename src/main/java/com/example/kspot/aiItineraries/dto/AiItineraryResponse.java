@@ -1,6 +1,6 @@
-package com.example.kspot.AiItineraries.dto;
+package com.example.kspot.aiItineraries.dto;
 
-import com.example.kspot.AiItineraries.entity.AiItinerary;
+import com.example.kspot.aiItineraries.entity.AiItinerary;
 
 import java.time.LocalDateTime;
 import java.util.Map;
