@@ -30,8 +30,8 @@ public class LocationImageService {
     private final LocationImageRepository locationImageRepository;
     private final RestTemplate restTemplate;
 
-    double MIN_HORIZONTAL_ASPECT_RATIO = 1.45;
-    double MAX_HORIZONTAL_ASPECT_RATIO = 1.85;
+    private final static double MIN_HORIZONTAL_ASPECT_RATIO = 1.45;
+    private final static double MAX_HORIZONTAL_ASPECT_RATIO = 1.85;
 
     @Value("${google.api.key}")
     private String googleApiKey;
