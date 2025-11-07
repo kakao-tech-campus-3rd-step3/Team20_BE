@@ -1,6 +1,6 @@
-package com.example.kspot.AiItineraries.repository;
+package com.example.kspot.aiItineraries.repository;
 
-import com.example.kspot.AiItineraries.entity.AiItinerary;
+import com.example.kspot.aiItineraries.entity.AiItinerary;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

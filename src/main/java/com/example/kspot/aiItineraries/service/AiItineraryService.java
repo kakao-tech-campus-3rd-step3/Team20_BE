@@ -1,9 +1,9 @@
-package com.example.kspot.AiItineraries.service;
+package com.example.kspot.aiItineraries.service;
 
-import com.example.kspot.AiItineraries.dto.AiItineraryListResponse;
-import com.example.kspot.AiItineraries.dto.AiItineraryResponse;
-import com.example.kspot.AiItineraries.entity.AiItinerary;
-import com.example.kspot.AiItineraries.repository.AiItineraryRepository;
+import com.example.kspot.aiItineraries.dto.AiItineraryListResponse;
+import com.example.kspot.aiItineraries.dto.AiItineraryResponse;
+import com.example.kspot.aiItineraries.entity.AiItinerary;
+import com.example.kspot.aiItineraries.repository.AiItineraryRepository;
 import com.example.kspot.users.entity.Users;
 import com.example.kspot.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

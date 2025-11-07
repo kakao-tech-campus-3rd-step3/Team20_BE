@@ -1,8 +1,8 @@
-package com.example.kspot.AiItineraries.controller;
+package com.example.kspot.aiItineraries.controller;
 
-import com.example.kspot.AiItineraries.dto.AiItineraryListResponse;
-import com.example.kspot.AiItineraries.dto.AiItineraryResponse;
-import com.example.kspot.AiItineraries.service.AiItineraryService;
+import com.example.kspot.aiItineraries.dto.AiItineraryListResponse;
+import com.example.kspot.aiItineraries.dto.AiItineraryResponse;
+import com.example.kspot.aiItineraries.service.AiItineraryService;
 import com.example.kspot.auth.jwt.JwtProvider;
 import com.example.kspot.global.dto.ApiResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
