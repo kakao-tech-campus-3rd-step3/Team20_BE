@@ -127,14 +127,13 @@ public class UsersController {
     })
     @PostMapping("/login")
     public ResponseEntity<ApiResponseDto<?>> login(@RequestBody UserRequestDto dto) {
-
         var token = userService.login(dto);
 
         ResponseCookie refreshToken = ResponseCookie.from("__Host-refresh_token", token.refreshToken())
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
-                .sameSite("Strict")
+                .sameSite("None")
                 .maxAge(refreshTtl)
                 .build();
 
@@ -142,7 +141,7 @@ public class UsersController {
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
-                .sameSite("Strict")
+                .sameSite("None")
                 .maxAge(accessTtl)
                 .build();
 
@@ -150,12 +149,14 @@ public class UsersController {
                 .header(HttpHeaders.SET_COOKIE, accessToken.toString())
                 .header(HttpHeaders.SET_COOKIE, refreshToken.toString())
                 .body(new ApiResponseDto<>(200, "로그인 성공", token.accessToken()));
-    }
+    }   
 
     @GetMapping("/mypage")
     public ResponseEntity<ApiResponseDto<?>> getMyPage(HttpServletRequest httpRequest) {
 
-        Long userId = jwtProvider.extractUserIdFromRequest(httpRequest);
+        String token = jwtProvider.extractTokenFromRequest(httpRequest);
+        Long userId = jwtProvider.validateToken(token);
+
         if (userId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new ApiResponseDto<>(401, "JWT 토큰이 유효하지 않습니다", null));
@@ -167,20 +168,41 @@ public class UsersController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletRequest httpRequest) {
-        Long userId = jwtProvider.extractUserIdFromRequest(httpRequest);
-        if (userId == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+    public ResponseEntity<ApiResponseDto<?>> logout(HttpServletRequest httpRequest) {
+
+        String accessTokenFromRequest = jwtProvider.extractTokenFromRequest(httpRequest);
+        Long userId = jwtProvider.validateToken(accessTokenFromRequest);
+
+        var tokenDto = userService.logout(userId);
+
+        ResponseCookie accessToken = ResponseCookie.from("__Host-access_token", tokenDto.accessToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .sameSite("None")
+                .maxAge(0)
+                .build();
+
+        ResponseCookie refreshToken = ResponseCookie.from("__Host-refresh_token", tokenDto.refreshToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .sameSite("None")
+                .maxAge(0)
+                .build();
+
         userService.logout(userId);
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, accessToken.toString())
+                .header(HttpHeaders.SET_COOKIE, refreshToken.toString())
+                .body(new ApiResponseDto<>(200, "로그아웃 성공", null));
     }
 
     @GetMapping("/status")
     public ResponseEntity<ApiResponseDto<?>> getStatus(HttpServletRequest httpRequest) {
-        String accessToken = jwtProvider.extractTokenFromRequest(httpRequest);
-        var dto = new UserStatusResponseDto(userService.getStatus(accessToken));
+        String refreshToken = jwtProvider.extractTokenFromRequest(httpRequest);
+        var dto = userService.getStatus(refreshToken);
         return ResponseEntity.ok(new ApiResponseDto<>(200 , "로그인 상태 확인" , dto));
     }
 
@@ -192,7 +214,7 @@ public class UsersController {
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
-                .sameSite("Strict")
+                .sameSite("None")
                 .maxAge(accessTtl)
                 .build();
 

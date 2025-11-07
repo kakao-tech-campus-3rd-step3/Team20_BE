@@ -8,7 +8,9 @@ public record LocationResponse (
         String address,
         Double latitude,
         Double longitude,
-        List<RelatedContent> relatedContents
+        List<RelatedContent> relatedContents,
+        String description,
+        List<String> imageUrl
 ){
     public record RelatedContent(
             Long contentId,

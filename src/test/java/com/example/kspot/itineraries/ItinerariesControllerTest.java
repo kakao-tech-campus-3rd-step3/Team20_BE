@@ -11,11 +11,13 @@ import com.example.kspot.itineraries.repository.ItineraryRepository;
 import com.example.kspot.locations.repository.LocationRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.Cookie;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -43,7 +45,11 @@ public class ItinerariesControllerTest {
   @Autowired
   private ObjectMapper objectMapper;
 
+  @Value("${master.jwt.key}")
   private String jwtToken;
+
+  Cookie refreshCookie;
+  Cookie accessCookie;
 
   //테이블에 데이터가 존재하는지 여부 + 데이터에 필수 칼럼(itierary_id 확인)
   @BeforeEach
@@ -53,36 +59,18 @@ public class ItinerariesControllerTest {
         .withFailMessage("Itinerary 테이블 내 데이터가 하나도 없습니다");
     Itinerary itinerary = existingItinerary.get();
     existingItineraryId = itinerary.getItineraryId();
-  }
-
-  @BeforeEach
-  void login() throws Exception{
-    String loginJson = """
-        {
-            "email" : "jaeho@naver.com",
-            "nickname" : "재호",
-            "password" : "123456789"
-        }
-        """;
-    MvcResult result = mockMvc.perform(post("/api/users/login")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(loginJson))
-        .andExpect(status().isOk())
-        .andReturn();
-
-    String responseBody = result.getResponse().getContentAsString();
-    JsonNode jsonNode = objectMapper.readTree(responseBody);
-    jwtToken = jsonNode.path("data").path("token").asText(); // 예: {"token":"eyJhbGciOiJI..."}
+    refreshCookie = new Cookie("__Host-access_token", jwtToken);
+    accessCookie = new Cookie("__Host-refresh_token", jwtToken);
   }
 
   @Test
   @DisplayName("1. itineraryId로 여행계획 조회 성공")
   void getItineraryById_success() throws Exception {
-    mockMvc.perform(get("/itineraries/{id}", existingItineraryId))
+    mockMvc.perform(get("/api/itineraries/{id}", existingItineraryId))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.data.itineraryId").value(existingItineraryId))
-        .andExpect(jsonPath("$.data.title").value("BTS 테마 여행"))
-        .andExpect(jsonPath("$.data.description").value("방탄소년단의 자취를 느낄 수 있는 여행계획!"))
+        .andExpect(jsonPath("$.data.title").value("BTS로 kpop 입문했어요."))
+        .andExpect(jsonPath("$.data.description").value("BTS 팬이어서 한국에 방문할 계획을 세웠어요!"))
         .andExpect(jsonPath("$.data.locations").isArray())
         .andExpect(jsonPath("$.message").value("여행 계획 상세 조회 성공"))
         .andExpect(jsonPath("$.status").value(200));
@@ -91,7 +79,7 @@ public class ItinerariesControllerTest {
   @Test
   @DisplayName("2. itineraryId로 여행계획 조회 실패")
   void getItineraryById_fail() throws Exception {
-    mockMvc.perform(get("/itineraries/{id}", 9752))
+    mockMvc.perform(get("/api/itineraries/{id}", 9752))
         .andExpect(status().isNotFound())
         .andExpect(jsonPath("$.data.locations").doesNotExist())
         .andExpect(jsonPath("$.message").value("존재하지 않는 여행계획 입니다"))
@@ -101,7 +89,7 @@ public class ItinerariesControllerTest {
   @Test
   @DisplayName("3. userId로 연관 여행계획 조회 성공")
   void getItineraryByUserId_success() throws Exception {
-    mockMvc.perform(get("/itineraries/user/{userId}", 1))
+    mockMvc.perform(get("/api/itineraries/user/{userId}", 1))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.data").isArray())
         .andExpect(jsonPath("$.message").value("사용자 여행 일정 목록 조회 성공"))
@@ -122,8 +110,9 @@ public class ItinerariesControllerTest {
               ]
             }
             """;
-    mockMvc.perform(post("/itineraries")
-            .header("Authorization", "Bearer " + jwtToken)
+    mockMvc.perform(post("/api/itineraries")
+            .cookie(refreshCookie)
+            .cookie(accessCookie)
             .contentType(MediaType.APPLICATION_JSON)
             .content(requestJson))
         .andExpect(status().isCreated())

@@ -21,7 +21,7 @@ public class contentLocationRelationMaker {
 
   @PostMapping("/api/content/location/relationMake")
   public ResponseEntity<ApiResponseDto<String>> relationMake() throws Exception {
-    ClassPathResource resource = new ClassPathResource("한국문화정보원_미디어콘텐츠_UTF8.csv");
+    ClassPathResource resource = new ClassPathResource("미디어콘텐츠 영상 촬영지 데이터_20250813_UTF-8.csv");
 
     BufferedReader br = new BufferedReader(
         new InputStreamReader(resource.getInputStream(), Charset.forName("UTF-8")));

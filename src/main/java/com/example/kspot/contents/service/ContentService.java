@@ -41,6 +41,19 @@ public class ContentService {
 
   // title로 컨텐츠 목록 조회
   public Page<Content> searchContentByTitle(String keyword, Pageable pageable) {
+    String normalizedKeyword = normalize(keyword);
+
+    if (!normalizedKeyword.isBlank()) {
+      // 띄어쓰기 기준으로 단어 분리 → 각각 필수 포함(+)
+      String booleanQuery = "+" + normalizedKeyword.replaceAll("\\s+", " +") + "*";
+
+      Page<Content> result = contentRepository.fullTextSearch(booleanQuery, pageable);
+      if (!result.isEmpty()) {
+        return result;
+      }
+    }
+
+    // fallback
     return contentRepository.findByTitleContainingIgnoreCase(keyword, pageable);
   }
 
@@ -53,7 +66,7 @@ public class ContentService {
 
   //인기순 조회 (전체 or 카테고리별)
 
-  public Page<ContentItemDto> getPopularContents(String category, int page, int size){
+  public Page<ContentItemDto> getPopularContents(String category, int page, int size) {
     Pageable pageable = PageRequest.of(page, size, Sort.by("popularity").descending());
 
     Page<Content> contents;
@@ -69,5 +82,9 @@ public class ContentService {
         c.getTitle(),
         c.getPoster_image_url()
     ));
+  }
+
+  private String normalize(String keyword) {
+    return keyword.replaceAll("[^a-zA-Z0-9가-힣\\s]", "").toLowerCase().trim();
   }
 }

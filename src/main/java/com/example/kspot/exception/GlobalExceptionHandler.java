@@ -10,6 +10,7 @@ import com.example.kspot.itineraries.exception.LocationNotFoundException;
 import com.example.kspot.locationReview.exception.LocationReviewIdNotFoundException;
 import com.example.kspot.locationReview.exception.LocationReviewNotFoundException;
 import com.example.kspot.users.exception.DuplicateNicknameException;
+import com.example.kspot.users.exception.DuplicateRegisterException;
 import com.example.kspot.users.exception.NotEmailVerifiedException;
 import com.example.kspot.users.exception.NotFoundUserException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -74,6 +75,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotFoundUserException.class)
     public ResponseEntity<String> handleNotFoundUser(NotFoundUserException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage()); //404
+    }
+
+    @ExceptionHandler(DuplicateRegisterException.class)
+    public ResponseEntity<String> handleDuplicateRegister(DuplicateRegisterException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage()); //409
     }
 
     // CSV 파일 파싱 중 오류 발생

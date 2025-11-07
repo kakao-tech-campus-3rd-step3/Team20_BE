@@ -1,18 +1,7 @@
-# Team20_BE [K-SPOT] 사용법
+# Team20_BE [K-SPOT] API
 
-### 기능개발순서
-
-1. develop 브랜치에서 원하는 기능을 구현하기위한 feature 브랜치를 새로 생성
-   (브랜치명 형식 : feature/kakao-login)
-2. 개발 진행  
-   a. 개발할 기능을 잘게 나눠 TODO_LIST.md에 작성  
-   b. 테스트 할 방법을 글로 작성  
-   c. 기능 구현  
-   d. 테스트 코드 작성 후 테스트 모두 통과시 commit  
-3. PR 생성 후 대기
-4. Peer Review 후 승인 되면 develop branch에 병합
-<img width="528" height="700" alt="image" src="https://github.com/user-attachments/assets/a7637021-50f4-44f7-8845-181253265b06" />
-
+### 기능구현 목록
+- server swagger 참고 (https://k-spot.kro.kr/swagger-ui/index.html#/)
 
 ### Commit Message 규칙
 **Type: 간단한 메세지**
