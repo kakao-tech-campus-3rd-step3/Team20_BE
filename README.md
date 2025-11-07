@@ -1,9 +1,37 @@
-# Team20_BE [K-SPOT] API
+# 🎬 K-SPOT
 
-### 기능구현 목록
+> **한국 콘텐츠 촬영지 탐방 서비스**  
+> 체계적인 아키텍처 설계와 현대적 개발 워크플로우를 통해 구축된 프로덕션 레디 웹 애플리케이션
+
+## 아키텍처 구조
+<img width="573" height="182" alt="수정 drawio (1)" src="https://github.com/user-attachments/assets/e1036555-3625-43bd-8047-4c3d6a0d7d6b" />
+
+- 해당 Repo의 develop 브랜치에 수정사항 발생시, Github Action을 통해 AWS EC2로 배포
+- main 브랜치는 주차별 기록용도
+
+## 기능구현 목록
 - server swagger 참고 (https://k-spot.kro.kr/swagger-ui/index.html#/)
 
-### Commit Message 규칙
+## 기초 데이터 및 DB구조
+<img width="736" height="1234" alt="image" src="https://github.com/user-attachments/assets/2843c39f-624b-4244-8d99-b6fb84c89220" />
+
+[TMDB](https://www.themoviedb.org/) : 컨텐츠 관련 데이터 API로 제공
+- Artist
+- Contents
+
+[공공데이터포털](https://www.data.go.kr/data/15111405/fileData.do) : 한국문화정보원_미디어콘텐츠 영상 촬영지 데이터
+- Locations
+
+## 테이블 별 설계 목적
+- location_review : 해당 장소에 대한 사용자들의 리뷰를 달 수 있도록
+- itineraries : 사용자가 원하는 동선 정보를 저장할 수 있도록
+- email_verification_tokens : 회원가입시 이메일 인증에 사용할 토큰
+- title_alias : Contents의 별명이나 줄임말을 저장해 검색하기 편하게 만들기 위해
+- content_location : 장소-컨텐츠 연관관계 맵핑 목적으로 생성. 해당 contents에서 어떤 장면에서 나왔는지 설명도 첨부
+- location_images : 장소에 대한 간략한 사진을 통해 찾아 갔을때 '여기네!' 할 수 있도록
+- itinerary_location : 여행 동선 안에서 순서를 저장하기위해
+
+## Commit Message 규칙
 **Type: 간단한 메세지**
 - feat: Add kakao-login api
 - docs: README에 commit message 규칙 추가
