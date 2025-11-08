@@ -38,7 +38,7 @@ com.example.kspot
 ├── artists            # 아티스트(배우, 가수 등)
 ├── auth.jwt           # JWT 인증 및 인가
 ├── config             # 보안, Swagger, CORS 등 환경 설정
-├── contents           # 영화·드라마 등 콘텐츠 관리
+├── contents           # 영화·드라마,KPOP 콘텐츠 관리
 ├── email              # 이메일 인증 및 발송
 ├── exception          # 전역 예외 처리
 ├── external.tmdb      # 외부 API 연동 (TMDB, Kakao 등)
