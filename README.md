@@ -31,6 +31,25 @@
 - location_images : 장소에 대한 간략한 사진을 통해 찾아 갔을때 '여기네!' 할 수 있도록
 - itinerary_location : 여행 동선 안에서 순서를 저장하기위해
 
+## 도메인 및 패키지 구성
+<pre><code>
+com.example.kspot
+├── aiitineraries      # AI 여행 일정 관리
+├── artists            # 아티스트(배우, 가수 등)
+├── auth.jwt           # JWT 인증 및 인가
+├── config             # 보안, Swagger, CORS 등 환경 설정
+├── contents           # 영화·드라마 등 콘텐츠 관리
+├── email              # 이메일 인증 및 발송
+├── exception          # 전역 예외 처리
+├── external.tmdb      # 외부 API 연동 (TMDB, Kakao 등)
+├── global.dto         # 공용 DTO
+├── itineraries        # 일반 여행 일정 관리
+├── locationReview     # 장소 리뷰 기능
+├── locations          # 촬영지 정보 관리
+└── users              # 사용자 관리
+</code></pre>
+
+
 ## Commit Message 규칙
 **Type: 간단한 메세지**
 - feat: Add kakao-login api
